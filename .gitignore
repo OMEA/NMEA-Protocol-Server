@@ -1,5 +1,10 @@
 CMakeCache.txt
+CMakeLists.txt
 CMakeFiles
+CMakeScripts
 Makefile
 cmake_install.cmake
 install_manifest.txt
+NMEA-Protocol-Server.build
+NMEA-Protocol-Server.xcodeproj
+bin
