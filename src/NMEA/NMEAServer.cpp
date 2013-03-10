@@ -39,7 +39,7 @@ void NMEAServer::receiveCommand(Command_ptr command){
         }
     }
     if(command->getReceiver()=="server"){
-        if(command->getCommand()=="exit"){
+        if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
             command->getSender()->deliverAnswer("The exit command is not implemented\n");
             //TODO SHUTDOWN IMPLEMENTIEREN
         }

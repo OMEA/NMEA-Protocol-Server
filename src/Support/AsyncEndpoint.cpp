@@ -16,10 +16,12 @@ template<class T> AsyncEndpoint<T>::~AsyncEndpoint(){
 }
 
 template<class T> void AsyncEndpoint<T>::receiveCommand(Command_ptr command){
-    if(command->getCommand()=="exit"){
+    if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
         aostream->close();
     }
-    NMEAEndpoint::receiveCommand(command);
+    else{
+        NMEAEndpoint::receiveCommand(command);
+    }
 }
 
 template<class T> void AsyncEndpoint<T>::deliver_impl(NMEAmsg_ptr msg){

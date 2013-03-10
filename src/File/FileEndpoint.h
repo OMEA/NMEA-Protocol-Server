@@ -29,6 +29,7 @@ public:
     void deliver_impl(NMEAmsg_ptr msg);
     void deliverAnswer_impl(std::string answer);
     std::string getId();
+    virtual void receiveCommand(Command_ptr command);
 protected:
     virtual boost::shared_ptr<NMEAEndpoint> v_shared_from_this(){return this->shared_from_this();}
     

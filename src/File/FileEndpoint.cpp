@@ -9,6 +9,14 @@
 #include "FileEndpoint.h"
 #include "../NMEA/NMEAServer.h"
 
+void FileEndpoint::receiveCommand(Command_ptr command){
+    if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
+        close();
+    }
+    else{
+        NMEAEndpoint::receiveCommand(command);
+    }
+}
 
 void FileEndpoint::deliver_impl(NMEAmsg_ptr msg){
     file_stream<<  to_simple_string(msg->getReceived()) << " " << msg->data();
@@ -37,6 +45,6 @@ void FileEndpoint::open(char *filename){
  }
 
 void FileEndpoint::close(){
-    file_stream.close();
     NMEAServer::getInstance()->removeEndpoint(shared_from_this());
+    file_stream.close();
 }
