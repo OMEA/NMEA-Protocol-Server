@@ -18,7 +18,7 @@ using boost::asio::ip::tcp;
 class TCPSession : public AsyncEndpoint<boost::asio::ip::tcp::socket>
 {
 public:
-    TCPSession(boost::asio::io_service& io_service);
+    TCPSession(boost::asio::io_service& io_service, unsigned int port);
     virtual ~TCPSession();
     
     tcp::socket& socket();
@@ -27,6 +27,7 @@ public:
     
 private:
     tcp::socket socket_;
+    unsigned int port;
 };
 
 

@@ -6,6 +6,8 @@
 //  Copyright (c) 2013 Till Steinbach. All rights reserved.
 //
 
+#include <signal.h>
+
 #include <iostream>
 
 
@@ -20,7 +22,16 @@
 #include "Serial/SerialPort.h"
 #include "NMEA/NMEAServer.h"
 #include "File/FileEndpoint.h"
+#include "Config/ConfigEndpoint.h"
 
+
+NMEAServer *srv;
+
+void sighandler(int sig)
+{
+    std::cout << "Shutdown server ";
+    srv->stop();
+}
 
 int main(int argc, const char * argv[])
 {
@@ -28,43 +39,36 @@ int main(int argc, const char * argv[])
     // insert code here...
     std::cout << "Hello, World!\n";
     
-    NMEAServer *srv = NMEAServer::getInstance();
+    srv = NMEAServer::getInstance();
     boost::thread workerThread(&NMEAServer::run, srv);
+    std::cout << "Serverthread started" << std::endl;
+    ConfigEndpoint::factory("default");
+    std::cout << "default config loaded" << std::endl;
     
-    try
-    {
-        FileEndpoint_ptr testfile(new FileEndpoint);
-        testfile->open("/tmp/test");
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << "FileEndpoint Exception: " << e.what() << "\n";
-    }
     
-    try
-    {
-        SerialPort p("/dev/master",9600);
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << "SerialPort Exception: " << e.what() << "\n";
-    }
+    //try
+    //{
+    //    SerialPort p("/dev/master",9600);
+    //}
+    //catch (std::exception& e)
+    //{
+    //    std::cerr << "SerialPort Exception: " << e.what() << "\n";
+    //}
+    struct sigaction act;
+    act.sa_handler = sighandler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    sigaction(SIGINT, &act, 0);
+    sigaction(SIGTERM, &act, 0);
+    sigaction(SIGABRT, &act, 0);
     
-    try
-    {
+    std::cout << "Server ready" << std::endl;
+    
         
-        boost::asio::io_service io_service;
-        
-        using namespace std; // For atoi.
-        TCPServer s(io_service, 10110);
-        TCPServer s2(io_service, 10111);
-        io_service.run();
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << "Exception: " << e.what() << "\n";
-    }
     
-    return 0;
+    workerThread.join();
+    std::cout << "[done]" << std::endl;
+    
+    return EXIT_SUCCESS;
 }
 

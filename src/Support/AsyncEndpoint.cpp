@@ -17,7 +17,14 @@ template<class T> AsyncEndpoint<T>::~AsyncEndpoint(){
 
 template<class T> void AsyncEndpoint<T>::receiveCommand(Command_ptr command){
     if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
-        aostream->close();
+        try
+        {
+            aostream->close();
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "TCPSession Exception: " << e.what() << "\n";
+        }
     }
     else{
         NMEAEndpoint::receiveCommand(command);

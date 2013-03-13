@@ -15,6 +15,7 @@
 #include <boost/thread/condition_variable.hpp>
 
 #include "../Support/Command.h"
+#include "../Support/IOServicePool.h"
 #include "NMEAmsg.h"
 #include "NMEAEndpoint.h"
 
@@ -25,11 +26,15 @@ private:
     std::list<NMEAEndpoint_ptr> endpoints;
     boost::condition_variable msgsCond;
     boost::mutex msgsMutex;
+    /// The pool of io_service objects used to perform asynchronous operations.
+    io_service_pool io_service_pool_;
+    bool shouldRun=false;
     
-    NMEAServer(void){}
+    NMEAServer(void);
     ~NMEAServer(void){}
 public:
     void run(void);
+    void stop(void);
     void receive(NMEAmsg_ptr msg);
     void receiveCommand(Command_ptr command);
     void addEndpoint(NMEAEndpoint_ptr endpoint);

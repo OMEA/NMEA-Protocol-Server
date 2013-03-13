@@ -9,9 +9,16 @@
 #include "FileEndpoint.h"
 #include "../NMEA/NMEAServer.h"
 
+boost::shared_ptr<FileEndpoint> FileEndpoint::factory(std::string filename) {
+    FileEndpoint_ptr fileEndpoint(new FileEndpoint);
+    fileEndpoint->open(filename);
+    return fileEndpoint;
+}
+
 void FileEndpoint::receiveCommand(Command_ptr command){
     if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
         close();
+        command->getSender()->deliverAnswer("closed file "+filename+"\n");
     }
     else{
         NMEAEndpoint::receiveCommand(command);
@@ -38,9 +45,9 @@ std::string FileEndpoint::getId(){
     return "File://"+filename;
 }
 
-void FileEndpoint::open(char *filename){
-    this->filename = std::string(filename);
-    file_stream.open(filename);
+void FileEndpoint::open(std::string filename){
+    this->filename = filename;
+    file_stream.open(filename.c_str());
     NMEAServer::getInstance()->addEndpoint(shared_from_this());
  }
 

@@ -28,6 +28,7 @@ public:
 private:
     boost::asio::io_service& io_service_;
     boost::asio::ip::tcp::acceptor acceptor_;
+    short port;
 };
 
 
