@@ -94,7 +94,7 @@ void ConfigEndpoint::load(std::string configname){
         }
     }
     file_stream.close();
-    NMEAServer::getInstance()->addEndpoint(shared_from_this());
+    registerEndpoint();
     for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command) {
         deliverCommand(*command);
     }
@@ -110,5 +110,5 @@ void ConfigEndpoint::save(std::string configname){
 }
 
 void ConfigEndpoint::close(){
-    NMEAServer::getInstance()->removeEndpoint(shared_from_this());
+    unregisterEndpoint();
 }

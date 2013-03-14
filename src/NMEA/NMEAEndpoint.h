@@ -23,6 +23,8 @@ public:
     virtual ~NMEAEndpoint(){}
     void deliver(NMEAmsg_ptr msg);
     void receive(NMEAmsg_ptr msg);
+    virtual void registerEndpoint();
+    virtual void unregisterEndpoint();
     virtual void receiveCommand(Command_ptr command);
     void deliverCommand(Command_ptr command);
     void deliverAnswer(std::string answer);

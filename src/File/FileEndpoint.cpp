@@ -133,10 +133,9 @@ std::string FileEndpoint::getId(){
 void FileEndpoint::open(std::string filename){
     this->filename = filename;
     file_stream.open(filename.c_str());
-    NMEAServer::getInstance()->addEndpoint(shared_from_this());
- }
+    registerEndpoint(); }
 
 void FileEndpoint::close(){
-    NMEAServer::getInstance()->removeEndpoint(shared_from_this());
+    unregisterEndpoint();
     file_stream.close();
 }

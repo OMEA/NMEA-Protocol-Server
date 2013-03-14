@@ -17,6 +17,15 @@ NMEAEndpoint::NMEAEndpoint(){
     checksum=true;
 }
 
+void NMEAEndpoint::registerEndpoint(){
+    NMEAServer::getInstance()->addEndpoint(this->v_shared_from_this());
+    //Command_ptr command(new Command());
+}
+
+void NMEAEndpoint::unregisterEndpoint(){
+    NMEAServer::getInstance()->removeEndpoint(this->v_shared_from_this());
+}
+
 void NMEAEndpoint::deliver(NMEAmsg_ptr msg){
     if(output && (portmirror || msg->getSender()!=this->v_shared_from_this()))
         deliver_impl(msg);

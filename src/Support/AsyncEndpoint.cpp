@@ -98,7 +98,7 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
     }
     else
     {
-        NMEAServer::getInstance()->removeEndpoint(this->shared_from_this());
+        unregisterEndpoint();
     }
 }
 
@@ -140,18 +140,18 @@ template<class T> void AsyncEndpoint<T>::handle_write(const boost::system::error
     }
     else
     {
-        NMEAServer::getInstance()->removeEndpoint(this->shared_from_this());
+        unregisterEndpoint();
     }
 }
 
 template<class T> void AsyncEndpoint<T>::stop()
 {
-    NMEAServer::getInstance()->removeEndpoint(this->shared_from_this());
+    unregisterEndpoint();
 }
 
 template<class T> void AsyncEndpoint<T>::start()
 {
-    NMEAServer::getInstance()->addEndpoint(this->shared_from_this());
+    registerEndpoint();
     aostream->async_read_some(boost::asio::buffer(data_, max_length),
                             boost::bind(&AsyncEndpoint::handle_read, this,
                                         boost::asio::placeholders::error,
