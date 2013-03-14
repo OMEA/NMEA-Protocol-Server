@@ -14,7 +14,7 @@ NMEAEndpoint::NMEAEndpoint(){
     input=true;
     output=true;
     portmirror=false;
-    checksum=false;
+    checksum=true;
 }
 
 void NMEAEndpoint::deliver(NMEAmsg_ptr msg){
