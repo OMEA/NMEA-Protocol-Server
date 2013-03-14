@@ -25,7 +25,7 @@ public:
     static boost::shared_ptr<FileEndpoint> factory(std::string filename=std::string(""));
 public:
     FileEndpoint();
-    ~FileEndpoint();
+    virtual ~FileEndpoint();
     void open(std::string filename);
     void close();
     void deliver_impl(NMEAmsg_ptr msg);
@@ -43,8 +43,8 @@ private:
     std::deque<NMEAmsg_ptr> message_queue;
     std::fstream file_stream;
     std::string filename;
-    bool playback=false;
-    bool stopPlaybackNow=true;
+    bool playback;
+    bool stopPlaybackNow;
     boost::thread playbackThread;
 };
 

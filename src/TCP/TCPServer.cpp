@@ -12,9 +12,9 @@
 using boost::asio::ip::tcp;
 
 TCPServer::TCPServer(boost::asio::io_service& io_service, short port):
-    port(port),
     io_service_(io_service),
-    acceptor_(io_service, tcp::endpoint(tcp::v4(), port))
+    acceptor_(io_service, tcp::endpoint(tcp::v4(), port)),
+    port(port)
 {
     TCPSession* new_session = new TCPSession(io_service_, port);
     acceptor_.async_accept(new_session->socket(),

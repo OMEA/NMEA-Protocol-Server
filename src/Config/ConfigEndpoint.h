@@ -24,7 +24,7 @@ public:
     static boost::shared_ptr<ConfigEndpoint> factory(std::string configname=std::string(""));
 public:
     ConfigEndpoint();
-    ~ConfigEndpoint();
+    virtual ~ConfigEndpoint();
     void load(std::string filename);
     void save(std::string filename=std::string(""));
     void close();

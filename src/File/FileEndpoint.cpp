@@ -117,6 +117,8 @@ void FileEndpoint::deliverAnswer_impl(std::string answer){
 }
 
 FileEndpoint::FileEndpoint(){
+    playback=false;
+    stopPlaybackNow=true;
 }
 
 FileEndpoint::~FileEndpoint(){
