@@ -49,8 +49,8 @@ void ConfigEndpoint::receiveCommand(Command_ptr command){
     else if(command->getCommand()=="list"){
         std::stringstream ss;
         ss << "Currently " << commands.size() << " commands in config" << std::endl << "---------------------------------------" << std::endl;
-        for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command) {
-            ss << (*command)->to_str() << '\n';
+        for (std::list<Command_ptr>::const_iterator commandi = commands.begin(), end = commands.end(); commandi != end; ++commandi) {
+            ss << (*commandi)->to_str() << '\n';
         }
         command->getSender()->deliverAnswer(ss.str());
     }
