@@ -18,7 +18,7 @@
 #include <boost/enable_shared_from_this.hpp>
 
 #include "../NMEA/NMEAEndpoint.h"
-#include "../NMEA/NMEAMsg.h"
+#include "../NMEA/NMEAmsg.h"
 
 class FileEndpoint : public NMEAEndpoint, public boost::enable_shared_from_this<FileEndpoint>{
 public:
