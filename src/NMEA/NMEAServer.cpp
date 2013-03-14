@@ -136,7 +136,7 @@ void NMEAServer::run(){
         msgsCond.wait(lock);
         while(!msgs.empty()){
             NMEAmsg_ptr tmp_msg = msgs.front();
-            std::cout << (*tmp_msg).to_str(true);
+            //std::cout << (*tmp_msg).to_str(true);
             for (std::list<NMEAEndpoint_ptr>::const_iterator endpoint = endpoints.begin(), end = endpoints.end(); endpoint != end; ++endpoint) {
                 (*endpoint)->deliver(msgs.front());
             }
