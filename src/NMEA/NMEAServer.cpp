@@ -21,7 +21,7 @@ NMEAServer* NMEAServer::getInstance() {
 }
 
 NMEAServer::NMEAServer(): io_service_pool_(1){
-    
+    shouldRun=false;
 }
 
 void NMEAServer::addEndpoint(NMEAEndpoint_ptr endpoint){

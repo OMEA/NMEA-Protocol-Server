@@ -28,7 +28,7 @@ private:
     boost::mutex msgsMutex;
     /// The pool of io_service objects used to perform asynchronous operations.
     io_service_pool io_service_pool_;
-    bool shouldRun=false;
+    bool shouldRun;
     
     NMEAServer(void);
     ~NMEAServer(void){}
