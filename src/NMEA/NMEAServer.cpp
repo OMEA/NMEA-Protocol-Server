@@ -91,7 +91,7 @@ void NMEAServer::receiveCommand(Command_ptr command){
                     try
                     {
                         FileEndpoint::factory(args);
-                        command->getSender()->deliverAnswer("New file Endpoint successfully created");
+                        command->getSender()->deliverAnswer("New file Endpoint successfully created\n");
                     }
                     catch (std::exception& e)
                     {
@@ -107,7 +107,7 @@ void NMEAServer::receiveCommand(Command_ptr command){
                         new TCPServer(*io_service, std::atoi(args.c_str()));
                         //FileEndpoint::factory(args);
                         boost::thread bt(boost::bind(&boost::asio::io_service::run, io_service));
-                        command->getSender()->deliverAnswer("New tcp Endpoint successfully created");
+                        command->getSender()->deliverAnswer("New tcp Endpoint successfully created\n");
                     }
                     catch (std::exception& e)
                     {

@@ -80,7 +80,7 @@ const std::string NMEAmsg::to_str(bool checksum) const {
         sprintf(checksumhex, "%02x", checksumchar);
         ss2 << '*' << checksumhex;
     }
-    ss1 << this->start << ss2.str() << '\n';
+    ss1 << this->start << ss2.str() << '\r' << '\n';
     return ss1.str();
 }
 
