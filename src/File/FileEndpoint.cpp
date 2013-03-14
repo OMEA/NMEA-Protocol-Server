@@ -70,7 +70,8 @@ void FileEndpoint::play(boost::posix_time::ptime from,  boost::posix_time::ptime
     
     file_stream.seekg(0, file_stream.beg);
     
-    boost::regex reg("^([^ ]+\\s[^ ]+)\\s([[:print:]]+)\\h?");
+    //boost::regex reg("^([^ ]+\\s[^ ]+)\\s([[:print:]]+)\\h?");
+    boost::regex reg("^(\\d{4}-.*-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}.\\d{1,10}\\s)?([[:print:]]+)\\h?");
     boost::cmatch matches;
     std::string line;
     while(!stopPlaybackNow && std::getline(file_stream,line)){
