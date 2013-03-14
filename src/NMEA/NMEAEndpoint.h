@@ -19,6 +19,8 @@
 class NMEAEndpoint
 {
 public:
+    NMEAEndpoint();
+    virtual ~NMEAEndpoint(){}
     void deliver(NMEAmsg_ptr msg);
     void receive(NMEAmsg_ptr msg);
     virtual void receiveCommand(Command_ptr command);
@@ -32,10 +34,10 @@ protected:
     virtual boost::shared_ptr<NMEAEndpoint> v_shared_from_this()=0;
     
 protected:
-    bool input=true;
-    bool output=true;
-    bool portmirror=false;
-    bool checksum=false;
+    bool input;
+    bool output;
+    bool portmirror;
+    bool checksum;
 };
 
 typedef boost::shared_ptr<NMEAEndpoint> NMEAEndpoint_ptr;

@@ -10,6 +10,12 @@
 
 #include "NMEAServer.h"
 
+NMEAEndpoint::NMEAEndpoint(){
+    input=true;
+    output=true;
+    portmirror=false;
+    checksum=false;
+}
 
 void NMEAEndpoint::deliver(NMEAmsg_ptr msg){
     if(output && (portmirror || msg->getSender()!=this->v_shared_from_this()))
