@@ -11,17 +11,12 @@
 #include <boost/regex.hpp>
 #include <string>
 
-NMEAmsg::NMEAmsg(){
-    received = boost::posix_time::microsec_clock::local_time();
-    
+NMEAmsg::NMEAmsg(): Message(){
     //TODO
-     start='$'; id="P"; msg="none";
+    start='$'; id="P"; msg="none";
 }
 
-NMEAmsg::NMEAmsg(std::string parseMsg, NMEAEndpoint_ptr sender){
-    received = boost::posix_time::microsec_clock::local_time();
-    this->sender=sender;
-    
+NMEAmsg::NMEAmsg(std::string parseMsg, Endpoint_ptr sender): Message(sender){
     boost::regex reg("^([!\\$])([[:alnum:]]{1,5}),([[:print:]]+)\\h?$");
     boost::regex regChecksum("^([!\\$])([[:alnum:]]{1,5}),([[:print:]]+)\\*([[:xdigit:]]{1,2})\\h?$");
     boost::cmatch matches;
@@ -44,7 +39,8 @@ NMEAmsg::NMEAmsg(std::string parseMsg, NMEAEndpoint_ptr sender){
 }
 
 const char * NMEAmsg::data(bool checksum) const{
-    return to_str(checksum).c_str();
+    //todo checksum
+    return to_str().c_str();
 }
 
 void NMEAmsg::setMsg(std::string msg){
@@ -54,7 +50,8 @@ void NMEAmsg::setMsg(std::string msg){
 }
 
 int NMEAmsg::toBuffer(char* buffer, unsigned int size, bool checksum){
-    std::string tmpString = to_str(checksum);
+    //todo checksum
+    std::string tmpString = to_str();
     unsigned int length = tmpString.length();
     if(length>size)
         return -1;
@@ -63,10 +60,13 @@ int NMEAmsg::toBuffer(char* buffer, unsigned int size, bool checksum){
 }
 
 const size_t NMEAmsg::length(bool checksum) const{
-    return to_str(checksum).length();
+    //TODO checksum
+    return to_str().length();
 }
 
-const std::string NMEAmsg::to_str(bool checksum) const {
+const std::string NMEAmsg::to_str() const {
+    //TODO
+    bool checksum = true;
     std::stringstream ss1;
     std::stringstream ss2;
     ss2 << this->id << "," << this->msg;

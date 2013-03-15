@@ -25,7 +25,7 @@
 #include "Config/ConfigEndpoint.h"
 
 
-NMEAServer *srv;
+NMEAServer_ptr srv;
 
 void sighandler(int sig)
 {

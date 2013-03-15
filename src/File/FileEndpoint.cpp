@@ -16,29 +16,30 @@ boost::shared_ptr<FileEndpoint> FileEndpoint::factory(std::string filename) {
     return fileEndpoint;
 }
 
-void FileEndpoint::receiveCommand(Command_ptr command){
+void FileEndpoint::receive(Command_ptr command){
     if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
+        FileEndpoint_ptr this_ptr = this->shared_from_this();
         close();
-        command->getSender()->deliverAnswer("closed file "+filename+"\n");
+        command->answer("closed file "+filename+"\n", this_ptr);
     }
     else if(command->getCommand()=="restart"){
         file_stream.seekg(0, file_stream.beg);
-        command->getSender()->deliverAnswer("playback of "+getId()+" restarted at beginning\n");
+        command->answer("playback of "+getId()+" restarted at beginning\n", this->shared_from_this());
     }
     else if(command->getCommand()=="stop"){
         stopPlayback();
-        command->getSender()->deliverAnswer("playback of "+getId()+" stopped\n");
+        command->answer("playback of "+getId()+" stopped\n", this->shared_from_this());
     }
     else if(command->getCommand()=="play"){
         startPlayback(boost::posix_time::microsec_clock::local_time(),boost::posix_time::microsec_clock::local_time());
-        command->getSender()->deliverAnswer("playback of "+getId()+" started\n");
+        command->answer("playback of "+getId()+" started\n", this->shared_from_this());
     }
     else if(command->getCommand()=="record"){
         record();
-        command->getSender()->deliverAnswer("record to "+getId()+" started\n");
+        command->answer("record to "+getId()+" started\n", this->shared_from_this());
     }
     else{
-        NMEAEndpoint::receiveCommand(command);
+        NMEAEndpoint::receive(command);
     }
 }
 
@@ -83,7 +84,7 @@ void FileEndpoint::play(boost::posix_time::ptime from,  boost::posix_time::ptime
             if(msg_or_cmd.find('#')!=std::string::npos){
                 try {
                     Command_ptr command(new Command(msg_or_cmd, this->shared_from_this()));
-                    deliverCommand(command);
+                    CommandEndpoint::deliver(command);
                 }
                 catch (const std::invalid_argument& ia) {
                     std::cerr << "Received a command that might not be conform with command format: " << line << std::endl;
@@ -113,7 +114,7 @@ void FileEndpoint::play(boost::posix_time::ptime from,  boost::posix_time::ptime
     stopPlayback();
 }
 
-void FileEndpoint::deliverAnswer_impl(std::string answer){
+void FileEndpoint::deliverAnswer_impl(Answer_ptr answer){
     //TODO: maybe write answers to file?
 }
 
@@ -123,7 +124,6 @@ FileEndpoint::FileEndpoint(){
 }
 
 FileEndpoint::~FileEndpoint(){
-    //close();
 }
 
 std::string FileEndpoint::getId(){
@@ -136,6 +136,7 @@ void FileEndpoint::open(std::string filename){
     registerEndpoint(); }
 
 void FileEndpoint::close(){
-    unregisterEndpoint();
+    NMEAServer::getInstance()->endpointOffline(this->v_shared_from_this());
     file_stream.close();
+    NMEAServer::getInstance()->removeEndpoint(this->v_shared_from_this());
 }

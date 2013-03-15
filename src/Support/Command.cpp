@@ -13,7 +13,7 @@
 
 using namespace boost::algorithm;
 
-Command::Command(std::string parseCommand, NMEAEndpoint_ptr sender): Message(sender){
+Command::Command(std::string parseCommand, Endpoint_ptr sender): Message(sender){
     boost::regex reg("^#([^#]*)#([^ ]+)(\\s[[:print:]]+)?\\h?$");
     boost::regex regLocal("^#([^ ]+)(\\s[[:print:]]+)?\\h?$");
     boost::cmatch matches;
@@ -46,4 +46,11 @@ const std::string Command::to_str() const {
     }
     ss << '#' << command << ' ' << arguments;
     return ss.str();
+}
+
+
+void Command::answer(std::string message, Endpoint_ptr sender){
+    Answer_ptr answer(new Answer(message, sender));
+    CommandEndpoint_ptr cmd_endpoint = boost::dynamic_pointer_cast<CommandEndpoint>(this->getSender());
+    cmd_endpoint->deliver(answer);
 }

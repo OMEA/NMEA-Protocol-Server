@@ -12,20 +12,23 @@
 #include <iostream>
 
 #include "Message.h"
+#include "CommandEndpoint.h"
 
-class NMEAEndpoint;
-typedef boost::shared_ptr<NMEAEndpoint> NMEAEndpoint_ptr;
+class CommandEndpoint;
+typedef boost::shared_ptr<CommandEndpoint> CommandEndpoint_ptr;
 
 class Command: public Message
 {
 public:
-    Command(std::string parseCommand, NMEAEndpoint_ptr sender);
+    Command(std::string parseCommand, Endpoint_ptr sender);
     virtual ~Command(){}
     
-    void setCommand(std::string receiver){this->command = command;}
+    void setCommand(std::string command){this->command = command;}
     const std::string getCommand()const{return this->command;}
     void setArguments(std::string arguments){this->arguments = arguments;}
     const std::string getArguments()const{return this->arguments;}
+    
+    void answer(std::string message, Endpoint_ptr sender);
     
     const std::string to_str() const;
 private:

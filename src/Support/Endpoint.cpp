@@ -1,0 +1,21 @@
+//
+//  Endpoint.cpp
+//  NMEA-Protocol-Server
+//
+//  Created by Till Steinbach on 14.03.13.
+//
+//
+
+#include "Endpoint.h"
+#include "../NMEA/NMEAServer.h"
+
+void Endpoint::registerEndpoint(){
+    NMEAServer::getInstance()->addEndpoint(this->v_shared_from_this());
+    NMEAServer::getInstance()->endpointOnline(this->v_shared_from_this());
+    //Command_ptr command(new Command());
+}
+
+void Endpoint::unregisterEndpoint(){
+    NMEAServer::getInstance()->endpointOffline(this->v_shared_from_this());
+    NMEAServer::getInstance()->removeEndpoint(this->v_shared_from_this());
+}

@@ -19,31 +19,49 @@
 #include "NMEAmsg.h"
 #include "NMEAEndpoint.h"
 
-class NMEAServer
+class NMEAServer;
+typedef boost::shared_ptr<NMEAServer> NMEAServer_ptr;
+
+class NMEAServer: public NMEAEndpoint, public boost::enable_shared_from_this<NMEAServer>
 {
+public:
+    //using NMEAEndpoint::receive;
+    //using CommandEndpoint::receive;
 private:
-    std::queue<NMEAmsg_ptr> msgs;
-    std::list<NMEAEndpoint_ptr> endpoints;
+    std::queue<Message_ptr> msgs;
+    std::list<Endpoint_ptr> online;
+    std::list<Endpoint_ptr> offline;
     boost::condition_variable msgsCond;
     boost::mutex msgsMutex;
     /// The pool of io_service objects used to perform asynchronous operations.
     io_service_pool io_service_pool_;
     bool shouldRun;
+    void receiveCommand(Command_ptr command);
+    
+    void receive(Message_ptr msg);
     
     NMEAServer(void);
-    ~NMEAServer(void){}
+protected:
+    virtual void deliver_impl(NMEAmsg_ptr msg){std::cerr<<"NMEAServer::deliver_impl not_implemented"<<std::endl;}
+    virtual void deliverAnswer_impl(Answer_ptr answer){std::cerr<<"NMEAServer::deliverAnswer_impl not_implemented"<<std::endl;}
+    virtual boost::shared_ptr<Endpoint> v_shared_from_this(){return this->shared_from_this();}
 public:
     void run(void);
     void stop(void);
-    void receive(NMEAmsg_ptr msg);
-    void receiveCommand(Command_ptr command);
-    void addEndpoint(NMEAEndpoint_ptr endpoint);
-    void removeEndpoint(NMEAEndpoint_ptr endpoint);
+    virtual void receive(Command_ptr msg);
+    virtual void receive(NMEAmsg_ptr msg);
+    virtual void receive(Answer_ptr msg);
+    
+    void addEndpoint(Endpoint_ptr endpoint);
+    void removeEndpoint(Endpoint_ptr endpoint);
+    void endpointOnline(Endpoint_ptr endpoint);
+    void endpointOffline(Endpoint_ptr endpoint);
+    virtual std::string getId(){return std::string("server");}
+    ~NMEAServer(void){}
 public:
-    static NMEAServer *getInstance();
+    static NMEAServer_ptr getInstance();
 
 };
-
 
 
 #endif /* defined(__NMEA_Protocol_Server__Server__) */

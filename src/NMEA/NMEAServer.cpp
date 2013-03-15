@@ -15,25 +15,43 @@
 #include "../TCP/TCPServer.h"
 #include "../File/FileEndpoint.h"
 
-NMEAServer* NMEAServer::getInstance() {
-    static NMEAServer theInstance;
-    return &theInstance;
+NMEAServer_ptr NMEAServer::getInstance() {
+    static NMEAServer_ptr theInstance(new NMEAServer());
+    return theInstance;
 }
 
 NMEAServer::NMEAServer(): io_service_pool_(1){
     shouldRun=false;
 }
 
-void NMEAServer::addEndpoint(NMEAEndpoint_ptr endpoint){
-    endpoints.push_back(endpoint);
-    std::cout << "Client registred, now having " << endpoints.size() << " clients" << std::endl;
+void NMEAServer::addEndpoint(Endpoint_ptr endpoint){
+    offline.push_back(endpoint);
 }
-void NMEAServer::removeEndpoint(NMEAEndpoint_ptr endpoint){
-    endpoints.remove(endpoint);
-    std::cout << "Client unregistred, now having " << endpoints.size() << " clients" << std::endl;
+void NMEAServer::removeEndpoint(Endpoint_ptr endpoint){
+    offline.remove(endpoint);
 }
 
+void NMEAServer::endpointOnline(Endpoint_ptr endpoint){
+    offline.remove(endpoint);
+    online.push_back(endpoint);
+    std::cout << "Client registred, now having " << online.size() << " ("<<online.size()+offline.size()<<") clients" << std::endl;
+}
+void NMEAServer::endpointOffline(Endpoint_ptr endpoint){
+    online.remove(endpoint);
+    offline.push_back(endpoint);
+    std::cout << "Client unregistred, now having " << online.size() << " ("<<online.size()+offline.size()<<") clients" << std::endl;
+}
+
+void NMEAServer::receive(Command_ptr msg){
+    receive((Message_ptr)msg);
+}
 void NMEAServer::receive(NMEAmsg_ptr msg){
+    receive((Message_ptr)msg);
+}
+void NMEAServer::receive(Answer_ptr msg){
+    receive((Message_ptr)msg);
+}
+void NMEAServer::receive(Message_ptr msg){
     msgsMutex.lock();
     msgs.push(msg);
     msgsMutex.unlock();
@@ -42,32 +60,20 @@ void NMEAServer::receive(NMEAmsg_ptr msg){
 }
 
 void NMEAServer::receiveCommand(Command_ptr command){
-    bool found=false;
-    for (std::list<NMEAEndpoint_ptr>::const_iterator endpoint = endpoints.begin(), end = endpoints.end(); endpoint != end; ++endpoint) {
-        std::string receiver = command->getReceiver();
-        boost::replace_all(receiver, "*", "(.*)");
-        boost::regex reg("^"+receiver+"$");
-         boost::cmatch matches;
-        if(boost::regex_search((*endpoint)->getId().c_str(), matches, reg)){
-            (*endpoint)->receiveCommand(command);
-            found=true;
-        }
-    }
-    if(command->getReceiver()=="server"){
         if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
             //TODO call exit on all endpoints
             raise(SIGTERM);
         }
         else if(command->getCommand()=="endpoints"){
             std::stringstream ss;
-            ss << "Currently " << endpoints.size() << " endpoints connected" << std::endl << "---------------------------------------" << std::endl;
-            for (std::list<NMEAEndpoint_ptr>::const_iterator endpoint = endpoints.begin(), end = endpoints.end(); endpoint != end; ++endpoint) {
+            ss << "Currently " << online.size() << " endpoints connected" << std::endl << "---------------------------------------" << std::endl;
+            for (std::list<Endpoint_ptr>::const_iterator endpoint = online.begin(), end = online.end(); endpoint != end; ++endpoint) {
                 ss << (*endpoint)->getId() << std::endl;
             }
-            command->getSender()->deliverAnswer(ss.str());
+            command->answer(ss.str(), this->shared_from_this());
         }
         else if(command->getCommand()=="time"){
-            command->getSender()->deliverAnswer(to_simple_string(boost::posix_time::microsec_clock::local_time())+"\n");
+            command->answer(to_simple_string(boost::posix_time::microsec_clock::local_time())+"\n", this->shared_from_this());
         }
         else if(command->getCommand()=="add"){
             boost::regex reg("^([[:alnum:]]*)\\h?$");
@@ -91,7 +97,7 @@ void NMEAServer::receiveCommand(Command_ptr command){
                     try
                     {
                         FileEndpoint::factory(args);
-                        command->getSender()->deliverAnswer("New file Endpoint successfully created\n");
+                        command->answer("New file Endpoint successfully created\n", this->shared_from_this());
                     }
                     catch (std::exception& e)
                     {
@@ -107,7 +113,7 @@ void NMEAServer::receiveCommand(Command_ptr command){
                         new TCPServer(*io_service, std::atoi(args.c_str()));
                         //FileEndpoint::factory(args);
                         boost::thread bt(boost::bind(&boost::asio::io_service::run, io_service));
-                        command->getSender()->deliverAnswer("New tcp Endpoint successfully created\n");
+                        command->answer("New tcp Endpoint successfully created\n", this->shared_from_this());
                     }
                     catch (std::exception& e)
                     {
@@ -116,17 +122,12 @@ void NMEAServer::receiveCommand(Command_ptr command){
                 }
             }
             else{
-                command->getSender()->deliverAnswer("Cannot understand command Argument "+command->getArguments()+" for Command "+command->getCommand()+"\n");
+                command->answer("Cannot understand command Argument "+command->getArguments()+" for Command "+command->getCommand()+"\n", this->shared_from_this());
             }
         }
         else{
-            command->getSender()->deliverAnswer("Cannot understand command "+command->getCommand()+"\n");
+            command->answer("Cannot understand command "+command->getCommand()+"\n", this->shared_from_this());
         }
-        found=true;
-    }
-    if(!found){
-        command->getSender()->deliverAnswer("The receiver "+command->getReceiver()+" was not found \n");
-    }
 }
 
 void NMEAServer::run(){
@@ -135,10 +136,38 @@ void NMEAServer::run(){
         boost::mutex::scoped_lock lock(msgsMutex);
         msgsCond.wait(lock);
         while(!msgs.empty()){
-            NMEAmsg_ptr tmp_msg = msgs.front();
-            //std::cout << (*tmp_msg).to_str(true);
-            for (std::list<NMEAEndpoint_ptr>::const_iterator endpoint = endpoints.begin(), end = endpoints.end(); endpoint != end; ++endpoint) {
-                (*endpoint)->deliver(msgs.front());
+            if(NMEAmsg_ptr tmp_msg = boost::dynamic_pointer_cast<NMEAmsg>(msgs.front())){
+                for (std::list<Endpoint_ptr>::const_iterator endpoint = online.begin(), end = online.end(); endpoint != end; ++endpoint) {
+                    NMEAEndpoint_ptr nmeaEnd = boost::dynamic_pointer_cast<NMEAEndpoint>(*endpoint);
+                    if(nmeaEnd){
+                        nmeaEnd->deliver(tmp_msg);
+                    }
+                }
+            }
+            else if(Command_ptr tmp_cmd = boost::dynamic_pointer_cast<Command>(msgs.front())){    
+                if(tmp_cmd->getReceiver()=="server"){
+                    receiveCommand(tmp_cmd);
+                }
+                else{
+                    bool found=false;
+                    std::list<Endpoint_ptr> tmplist(online);
+                    for (std::list<Endpoint_ptr>::const_iterator endpoint = tmplist.begin(), end = tmplist.end(); endpoint != end; ++endpoint) {
+                        std::string receiver = tmp_cmd->getReceiver();
+                        boost::replace_all(receiver, "*", "(.*)");
+                        boost::regex reg("^"+receiver+"$");
+                        boost::cmatch matches;
+                        CommandEndpoint_ptr commandEnd = boost::dynamic_pointer_cast<CommandEndpoint>(*endpoint);
+                        if(commandEnd){
+                            if(boost::regex_search(commandEnd->getId().c_str(), matches, reg)){
+                                commandEnd->receive(tmp_cmd);
+                                found=true;
+                            }
+                        }
+                    }
+                    if(!found){
+                        tmp_cmd->answer("The receiver "+tmp_cmd->getReceiver()+" was not found \n", this->shared_from_this());
+                    }
+                }
             }
             msgs.pop();
         }

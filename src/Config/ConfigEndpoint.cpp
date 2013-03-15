@@ -19,30 +19,31 @@ boost::shared_ptr<ConfigEndpoint> ConfigEndpoint::factory(std::string configname
     return configEndpoint;
 }
 
-void ConfigEndpoint::receiveCommand(Command_ptr command){
+void ConfigEndpoint::receive(Command_ptr command){
     if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
+        ConfigEndpoint_ptr this_ptr = this->shared_from_this();
         close();
-        command->getSender()->deliverAnswer("closed config "+configname+"\n");
+        command->answer("closed config "+configname+"\n", this_ptr);
     }
     else if(command->getCommand()=="add_command"){
         try {
             Command_ptr newCommand(new Command(command->getArguments(), this->shared_from_this()));
             commands.push_back(newCommand);
-            deliverCommand(newCommand);
+            deliver(newCommand);
         }
         catch (const std::invalid_argument& ia) {
-            command->getSender()->deliverAnswer("Command might not be conform with command format "+command->getArguments()+"\n");
+            command->answer("Command might not be conform with command format "+command->getArguments()+"\n", this->shared_from_this());
         }
-        command->getSender()->deliverAnswer("added command "+command->getArguments()+"\n");
+        command->answer("added command "+command->getArguments()+"\n", this->shared_from_this());
     }
     else if(command->getCommand()=="save"){
         if(command->getArguments().length()>0){
             save(command->getArguments());
-            command->getSender()->deliverAnswer("saved config to "+command->getArguments()+"\n");
+            command->answer("saved config to "+command->getArguments()+"\n", this->shared_from_this());
         }
         else{
             save(configname);
-            command->getSender()->deliverAnswer("saved config to "+configname+"\n");
+            command->answer("saved config to "+configname+"\n", this->shared_from_this());
         }
             
     }
@@ -52,17 +53,11 @@ void ConfigEndpoint::receiveCommand(Command_ptr command){
         for (std::list<Command_ptr>::const_iterator commandi = commands.begin(), end = commands.end(); commandi != end; ++commandi) {
             ss << (*commandi)->to_str() << '\n';
         }
-        command->getSender()->deliverAnswer(ss.str());
+        command->answer(ss.str(), this->shared_from_this());
     }
     else{
-        NMEAEndpoint::receiveCommand(command);
+        CommandEndpoint::receive(command);
     }
-}
-
-void ConfigEndpoint::deliver_impl(NMEAmsg_ptr msg){}
-
-void ConfigEndpoint::deliverAnswer_impl(std::string answer){
-    //TODO: maybe write answers to console?
 }
 
 ConfigEndpoint::ConfigEndpoint(){
@@ -96,7 +91,8 @@ void ConfigEndpoint::load(std::string configname){
     file_stream.close();
     registerEndpoint();
     for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command) {
-        deliverCommand(*command);
+        std::cout<<(**command)<<std::endl;
+        deliver(*command);
     }
  }
 

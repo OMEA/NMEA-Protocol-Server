@@ -15,7 +15,7 @@
 template<class T> AsyncEndpoint<T>::~AsyncEndpoint(){
 }
 
-template<class T> void AsyncEndpoint<T>::receiveCommand(Command_ptr command){
+template<class T> void AsyncEndpoint<T>::receive(Command_ptr command){
     if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
         try
         {
@@ -27,7 +27,7 @@ template<class T> void AsyncEndpoint<T>::receiveCommand(Command_ptr command){
         }
     }
     else{
-        NMEAEndpoint::receiveCommand(command);
+        NMEAEndpoint::receive(command);
     }
 }
 
@@ -42,10 +42,10 @@ template<class T> void AsyncEndpoint<T>::deliver_impl(NMEAmsg_ptr msg){
     }
 }
 
-template<class T> void AsyncEndpoint<T>::deliverAnswer_impl(std::string answer){
+template<class T> void AsyncEndpoint<T>::deliverAnswer_impl(Answer_ptr answer){
     answer_queueMutex.lock();
     bool wasEmpty = answer_queue.empty();
-    answer_queue.push_back(answer);
+    answer_queue.push_back((*answer));
     answer_queueMutex.unlock();
     if(wasEmpty){
         boost::system::error_code ec(0,boost::system::system_category());
@@ -71,7 +71,7 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
                 if(data.find('#')!=std::string::npos){
                     try {
                         Command_ptr command(new Command(tmpString, this->shared_from_this()));
-                        deliverCommand(command);
+                        CommandEndpoint::deliver(command);
                     }
                     catch (const std::invalid_argument& ia) {
                         std::cerr << "Received a command that might not be conform with command format: " << tmpString << std::endl;

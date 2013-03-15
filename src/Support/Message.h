@@ -14,28 +14,30 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/algorithm/string.hpp>
 
-class NMEAEndpoint;
-typedef boost::shared_ptr<NMEAEndpoint> NMEAEndpoint_ptr;
+class Endpoint;
+typedef boost::shared_ptr<Endpoint> Endpoint_ptr;
 
 using namespace boost::algorithm;
 
 class Message
 {
 public:
-    Message(NMEAEndpoint_ptr sender);
+    Message(Endpoint_ptr sender);
     Message();
     
     void setReceived(boost::posix_time::ptime received){this->received = received;}
     const boost::posix_time::ptime getReceived()const{return this->received;}
-    void setSender(NMEAEndpoint_ptr sender){this->sender = sender;}
-    const NMEAEndpoint_ptr getSender()const{return this->sender;}
+    void setSender(Endpoint_ptr sender){this->sender = sender;}
+    const Endpoint_ptr getSender()const{return this->sender;}
     void setReceiver(std::string receiver){trim(receiver); this->receiver = receiver;}
     const std::string getReceiver()const{return this->receiver;}
     
     virtual const std::string to_str() const = 0;
+    operator std::string ( ) const { return to_str(); }
+    friend std::ostream& operator<< (std::ostream &out, Message &message);
 private:
     boost::posix_time::ptime received;
-    NMEAEndpoint_ptr sender;
+    Endpoint_ptr sender;
     std::string receiver;
 };
 

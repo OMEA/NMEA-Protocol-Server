@@ -23,22 +23,23 @@
 
 template <class T>
 class AsyncEndpoint: public NMEAEndpoint, public boost::enable_shared_from_this< AsyncEndpoint<T> >{
-
+public:
+    using NMEAEndpoint::receive;
 public:
     ~AsyncEndpoint();
-    void setAOStream(T* aostream){this->aostream=aostream;}
-    void deliver_impl(NMEAmsg_ptr msg);
-    void deliverAnswer_impl(std::string answer);
     
     void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
     void handle_write(const boost::system::error_code& error);
     void start();
     void stop();
     
-    virtual void receiveCommand(Command_ptr command);
+    virtual void receive(Command_ptr command);
     
 protected:
-    virtual boost::shared_ptr<NMEAEndpoint> v_shared_from_this(){return this->shared_from_this();}
+    void setAOStream(T* aostream){this->aostream=aostream;}
+    void deliver_impl(NMEAmsg_ptr msg);
+    void deliverAnswer_impl(Answer_ptr answer);
+    virtual boost::shared_ptr<Endpoint> v_shared_from_this(){return this->shared_from_this();}
     
 private:
     T* aostream;

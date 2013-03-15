@@ -24,19 +24,21 @@ class FileEndpoint : public NMEAEndpoint, public boost::enable_shared_from_this<
 public:
     static boost::shared_ptr<FileEndpoint> factory(std::string filename=std::string(""));
 public:
+    using NMEAEndpoint::receive;
+public:
     FileEndpoint();
     virtual ~FileEndpoint();
     void open(std::string filename);
     void close();
     void deliver_impl(NMEAmsg_ptr msg);
-    void deliverAnswer_impl(std::string answer);
+    void deliverAnswer_impl(Answer_ptr answer);
     std::string getId();
-    virtual void receiveCommand(Command_ptr command);
+    virtual void receive(Command_ptr command);
     void startPlayback(boost::posix_time::ptime from,  boost::posix_time::ptime to);
     void stopPlayback(void);
     void record(void);
 protected:
-    virtual boost::shared_ptr<NMEAEndpoint> v_shared_from_this(){return this->shared_from_this();}
+    virtual boost::shared_ptr<Endpoint> v_shared_from_this(){return this->shared_from_this();}
     
 private:
     void play(boost::posix_time::ptime from,  boost::posix_time::ptime to);
