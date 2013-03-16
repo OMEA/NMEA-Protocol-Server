@@ -32,6 +32,7 @@ public:
     void setReceiver(std::string receiver){trim(receiver); this->receiver = receiver;}
     const std::string getReceiver()const{return this->receiver;}
     
+    int toBuffer(char* buffer, unsigned int size);
     virtual const std::string to_str() const = 0;
     operator std::string ( ) const { return to_str(); }
     friend std::ostream& operator<< (std::ostream &out, Message &message);

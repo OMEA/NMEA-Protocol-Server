@@ -10,6 +10,8 @@
 #include <iostream>
 #include <string>
 
+#include <boost/regex.hpp>
+
 #include "ConfigEndpoint.h"
 #include "../NMEA/NMEAServer.h"
 
@@ -25,6 +27,20 @@ void ConfigEndpoint::receive(Command_ptr command){
         close();
         command->answer("closed config "+configname+"\n", this_ptr);
     }
+    else if(command->getCommand()=="has_commands"){
+        for (std::list<Command_ptr>::const_iterator tmp_command = commands.begin(), end = commands.end(); tmp_command != end; ++tmp_command) {
+            std::string receiver = (*tmp_command)->getReceiver();
+            boost::replace_all(receiver, "*", "(.*)");
+            boost::regex reg("^"+receiver+"$");
+            boost::cmatch matches;
+            CommandEndpoint_ptr sender = boost::dynamic_pointer_cast<CommandEndpoint>(command->getSender());
+            if(sender){
+                if(boost::regex_search(sender->getId().c_str(), matches, reg)){
+                    sender->receive((*tmp_command));
+                }
+            }
+        }
+    }
     else if(command->getCommand()=="add_command"){
         try {
             Command_ptr newCommand(new Command(command->getArguments(), this->shared_from_this()));
@@ -32,7 +48,7 @@ void ConfigEndpoint::receive(Command_ptr command){
             deliver(newCommand);
         }
         catch (const std::invalid_argument& ia) {
-            command->answer("Command might not be conform with command format "+command->getArguments()+"\n", this->shared_from_this());
+            command->answer(Answer::UNKNOWN_CMD, "Command might not be conform with command format "+command->getArguments()+"\n", this->shared_from_this());
         }
         command->answer("added command "+command->getArguments()+"\n", this->shared_from_this());
     }
@@ -57,6 +73,12 @@ void ConfigEndpoint::receive(Command_ptr command){
     }
     else{
         CommandEndpoint::receive(command);
+    }
+}
+
+void ConfigEndpoint::deliverAnswer_impl(Answer_ptr answer){
+    if(answer->getType()!=Answer::UNKNOWN_RECEIVER){
+        std::cout<<getId()<<":"<<*answer;
     }
 }
 
@@ -91,7 +113,7 @@ void ConfigEndpoint::load(std::string configname){
     file_stream.close();
     registerEndpoint();
     for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command) {
-        std::cout<<(**command)<<std::endl;
+        std::cout<<getId()<<":"<<(**command)<<std::endl;
         deliver(*command);
     }
  }

@@ -12,7 +12,6 @@
 void Endpoint::registerEndpoint(){
     NMEAServer::getInstance()->addEndpoint(this->v_shared_from_this());
     NMEAServer::getInstance()->endpointOnline(this->v_shared_from_this());
-    //Command_ptr command(new Command());
 }
 
 void Endpoint::unregisterEndpoint(){

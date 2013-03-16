@@ -25,20 +25,35 @@ NMEAServer::NMEAServer(): io_service_pool_(1){
 }
 
 void NMEAServer::addEndpoint(Endpoint_ptr endpoint){
+    boost::mutex::scoped_lock lock(offlineMutex);
     offline.push_back(endpoint);
 }
 void NMEAServer::removeEndpoint(Endpoint_ptr endpoint){
+    boost::mutex::scoped_lock lock(offlineMutex);
     offline.remove(endpoint);
 }
 
 void NMEAServer::endpointOnline(Endpoint_ptr endpoint){
-    offline.remove(endpoint);
-    online.push_back(endpoint);
+    {
+        boost::mutex::scoped_lock lock(offlineMutex);
+        offline.remove(endpoint);
+    }
+    {
+        boost::mutex::scoped_lock lock(onlineMutex);
+        online.push_back(endpoint);
+    }
     std::cout << "Client registred, now having " << online.size() << " ("<<online.size()+offline.size()<<") clients" << std::endl;
 }
 void NMEAServer::endpointOffline(Endpoint_ptr endpoint){
-    online.remove(endpoint);
-    offline.push_back(endpoint);
+    {
+        boost::mutex::scoped_lock lock(onlineMutex);
+        online.remove(endpoint);
+    }
+    {
+        boost::mutex::scoped_lock lock(offlineMutex);
+        offline.push_back(endpoint);
+    }
+    
     std::cout << "Client unregistred, now having " << online.size() << " ("<<online.size()+offline.size()<<") clients" << std::endl;
 }
 
@@ -52,10 +67,8 @@ void NMEAServer::receive(Answer_ptr msg){
     receive((Message_ptr)msg);
 }
 void NMEAServer::receive(Message_ptr msg){
-    msgsMutex.lock();
-    msgs.push(msg);
-    msgsMutex.unlock();
     boost::mutex::scoped_lock lock(msgsMutex);
+    msgs.push_back(msg);
     msgsCond.notify_all();
 }
 
@@ -122,36 +135,45 @@ void NMEAServer::receiveCommand(Command_ptr command){
                 }
             }
             else{
-                command->answer("Cannot understand command Argument "+command->getArguments()+" for Command "+command->getCommand()+"\n", this->shared_from_this());
+                command->answer(Answer::WRONG_ARGS, "Cannot understand command Argument "+command->getArguments()+" for Command "+command->getCommand()+"\n", this->shared_from_this());
             }
         }
         else{
-            command->answer("Cannot understand command "+command->getCommand()+"\n", this->shared_from_this());
+            command->answer(Answer::UNKNOWN_CMD, "Cannot understand command "+command->getCommand()+"\n", this->shared_from_this());
         }
 }
 
 void NMEAServer::run(){
     shouldRun=true;
     while(shouldRun){
-        boost::mutex::scoped_lock lock(msgsMutex);
-        msgsCond.wait(lock);
-        while(!msgs.empty()){
-            if(NMEAmsg_ptr tmp_msg = boost::dynamic_pointer_cast<NMEAmsg>(msgs.front())){
-                for (std::list<Endpoint_ptr>::const_iterator endpoint = online.begin(), end = online.end(); endpoint != end; ++endpoint) {
+        std::list<Message_ptr> msgs_cpy;
+        {
+            boost::mutex::scoped_lock lock(msgsMutex);
+            msgsCond.wait(lock);
+            msgs_cpy = std::list<Message_ptr>(msgs);
+            
+        }
+        while(!msgs_cpy.empty()){
+            std::list<Endpoint_ptr> online_cpy;
+            {
+                boost::mutex::scoped_lock lock(msgsMutex);
+                online_cpy = std::list<Endpoint_ptr>(online);
+            }
+            if(NMEAmsg_ptr tmp_msg = boost::dynamic_pointer_cast<NMEAmsg>(msgs_cpy.front())){
+                for (std::list<Endpoint_ptr>::const_iterator endpoint = online_cpy.begin(), end = online_cpy.end(); endpoint != end; ++endpoint) {
                     NMEAEndpoint_ptr nmeaEnd = boost::dynamic_pointer_cast<NMEAEndpoint>(*endpoint);
                     if(nmeaEnd){
                         nmeaEnd->deliver(tmp_msg);
                     }
                 }
             }
-            else if(Command_ptr tmp_cmd = boost::dynamic_pointer_cast<Command>(msgs.front())){    
+            else if(Command_ptr tmp_cmd = boost::dynamic_pointer_cast<Command>(msgs_cpy.front())){
                 if(tmp_cmd->getReceiver()=="server"){
                     receiveCommand(tmp_cmd);
                 }
                 else{
                     bool found=false;
-                    std::list<Endpoint_ptr> tmplist(online);
-                    for (std::list<Endpoint_ptr>::const_iterator endpoint = tmplist.begin(), end = tmplist.end(); endpoint != end; ++endpoint) {
+                    for (std::list<Endpoint_ptr>::const_iterator endpoint = online_cpy.begin(), end = online_cpy.end(); endpoint != end; ++endpoint) {
                         std::string receiver = tmp_cmd->getReceiver();
                         boost::replace_all(receiver, "*", "(.*)");
                         boost::regex reg("^"+receiver+"$");
@@ -159,19 +181,24 @@ void NMEAServer::run(){
                         CommandEndpoint_ptr commandEnd = boost::dynamic_pointer_cast<CommandEndpoint>(*endpoint);
                         if(commandEnd){
                             if(boost::regex_search(commandEnd->getId().c_str(), matches, reg)){
-                                commandEnd->receive(tmp_cmd);
-                                found=true;
+                                if(tmp_cmd->getSender()!=commandEnd){
+                                    commandEnd->receive(tmp_cmd);
+                                    found=true;
+                                }
                             }
                         }
                     }
                     if(!found){
-                        tmp_cmd->answer("The receiver "+tmp_cmd->getReceiver()+" was not found \n", this->shared_from_this());
+                        tmp_cmd->answer(Answer::UNKNOWN_RECEIVER, "The receiver "+tmp_cmd->getReceiver()+" was not found \n", this->shared_from_this());
                     }
                 }
             }
-            msgs.pop();
+            {
+                boost::mutex::scoped_lock lock(msgsMutex);
+                msgs.remove(msgs_cpy.front());
+            }
+            msgs_cpy.pop_front();
         }
-        msgsMutex.unlock();
     }
 }
 

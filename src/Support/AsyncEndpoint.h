@@ -43,12 +43,9 @@ protected:
     
 private:
     T* aostream;
-    std::deque<NMEAmsg_ptr> message_queue;
+    std::deque<Message_ptr> message_queue;
     boost::condition_variable message_queueCond;
     boost::mutex message_queueMutex;
-    std::deque<std::string> answer_queue;
-    boost::condition_variable answer_queueCond;
-    boost::mutex answer_queueMutex;
     enum { max_length = 1024 };
     char data_[max_length];
     char data_send_[max_length];

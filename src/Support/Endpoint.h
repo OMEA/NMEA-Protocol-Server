@@ -17,10 +17,10 @@ class Endpoint
 {
 public:
     virtual ~Endpoint(){}
-    virtual void registerEndpoint();
-    virtual void unregisterEndpoint();
     virtual std::string getId()=0;
 protected:
+    virtual void registerEndpoint();
+    virtual void unregisterEndpoint();
     virtual boost::shared_ptr<Endpoint> v_shared_from_this()=0;
 };
 

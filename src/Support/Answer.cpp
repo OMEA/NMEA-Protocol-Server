@@ -8,7 +8,7 @@
 
 #include "Answer.h"
 
-Answer::Answer(std::string parseMessage, Endpoint_ptr sender): Message(sender){
+Answer::Answer(Answer::Type type, std::string parseMessage, Endpoint_ptr sender): Message(sender), type(type){
     trim(parseMessage);
     setMessage(parseMessage);
 }

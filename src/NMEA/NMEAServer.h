@@ -28,11 +28,14 @@ public:
     //using NMEAEndpoint::receive;
     //using CommandEndpoint::receive;
 private:
-    std::queue<Message_ptr> msgs;
-    std::list<Endpoint_ptr> online;
-    std::list<Endpoint_ptr> offline;
+    std::list<Message_ptr> msgs;
     boost::condition_variable msgsCond;
     boost::mutex msgsMutex;
+    std::list<Endpoint_ptr> online;
+    boost::mutex onlineMutex;
+    std::list<Endpoint_ptr> offline;
+    boost::mutex offlineMutex;
+    
     /// The pool of io_service objects used to perform asynchronous operations.
     io_service_pool io_service_pool_;
     bool shouldRun;

@@ -31,7 +31,7 @@ public:
     std::string getId();
     virtual void receive(Command_ptr command);
 protected:
-    virtual void deliverAnswer_impl(Answer_ptr answer){std::cout<<*answer<<std::endl;}
+    virtual void deliverAnswer_impl(Answer_ptr answer);
     virtual boost::shared_ptr<Endpoint> v_shared_from_this(){return this->shared_from_this();}
     
 private:

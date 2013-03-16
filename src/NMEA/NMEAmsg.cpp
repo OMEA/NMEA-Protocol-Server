@@ -49,16 +49,6 @@ void NMEAmsg::setMsg(std::string msg){
     this->msg = msg;
 }
 
-int NMEAmsg::toBuffer(char* buffer, unsigned int size, bool checksum){
-    //todo checksum
-    std::string tmpString = to_str();
-    unsigned int length = tmpString.length();
-    if(length>size)
-        return -1;
-    memcpy(buffer,tmpString.c_str(),length);
-    return length;
-}
-
 const size_t NMEAmsg::length(bool checksum) const{
     //TODO checksum
     return to_str().length();

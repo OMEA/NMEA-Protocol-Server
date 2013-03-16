@@ -36,7 +36,6 @@ public:
         
     const char *data(bool checksum=false) const;
     const size_t length(bool checksum=false) const;
-    int toBuffer(char* buffer, unsigned int size, bool checksum=false);
     
 private:
     char start;

@@ -26,6 +26,7 @@ public:
     virtual void deliver(Command_ptr command);
     virtual void deliver(Answer_ptr answer);
 protected:
+    virtual void registerEndpoint();
     virtual void deliverAnswer_impl(Answer_ptr answer)=0;
     virtual boost::shared_ptr<Endpoint> v_shared_from_this()=0;
 };

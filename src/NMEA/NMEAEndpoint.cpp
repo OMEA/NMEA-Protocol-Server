@@ -48,7 +48,7 @@ void NMEAEndpoint::receive(Command_ptr command){
             command->answer("input is now turned off\n", this->v_shared_from_this());
         }
         else{
-            command->answer("Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->v_shared_from_this());
+            command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->v_shared_from_this());
         }
     }
     else if(command->getCommand()=="output"){
@@ -61,7 +61,7 @@ void NMEAEndpoint::receive(Command_ptr command){
             command->answer("output is now turned off\n", this->v_shared_from_this());
         }
         else{
-            command->answer("Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->v_shared_from_this());
+            command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->v_shared_from_this());
         }
     }
     else if(command->getCommand()=="mirror"){
@@ -74,7 +74,7 @@ void NMEAEndpoint::receive(Command_ptr command){
             command->answer("mirroring of messages is now turned off\n", this->v_shared_from_this());
         }
         else{
-            command->answer("Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->v_shared_from_this());
+            command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->v_shared_from_this());
         }
     }
     else if(command->getCommand()=="checksum"){
@@ -87,11 +87,11 @@ void NMEAEndpoint::receive(Command_ptr command){
             command->answer("checksum calculation is now turned off\n", this->v_shared_from_this());
         }
         else{
-            command->answer("Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->v_shared_from_this());
+            command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->v_shared_from_this());
         }
     }
     else{
-        command->answer("Cannot understand command "+command->getCommand()+"\n", this->v_shared_from_this());
+        command->answer(Answer::UNKNOWN_CMD, "Cannot understand command "+command->getCommand()+"\n", this->v_shared_from_this());
     }
     //TODO: response generieren und bei endpoint delivern
 }

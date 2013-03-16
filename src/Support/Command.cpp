@@ -48,9 +48,12 @@ const std::string Command::to_str() const {
     return ss.str();
 }
 
-
 void Command::answer(std::string message, Endpoint_ptr sender){
-    Answer_ptr answer(new Answer(message, sender));
+    answer(Answer::SUCCESS, message, sender);
+}
+
+void Command::answer(Answer::Type type, std::string message, Endpoint_ptr sender){
+    Answer_ptr answer(new Answer(type, message, sender));
     CommandEndpoint_ptr cmd_endpoint = boost::dynamic_pointer_cast<CommandEndpoint>(this->getSender());
     cmd_endpoint->deliver(answer);
 }

@@ -43,10 +43,10 @@ template<class T> void AsyncEndpoint<T>::deliver_impl(NMEAmsg_ptr msg){
 }
 
 template<class T> void AsyncEndpoint<T>::deliverAnswer_impl(Answer_ptr answer){
-    answer_queueMutex.lock();
-    bool wasEmpty = answer_queue.empty();
-    answer_queue.push_back((*answer));
-    answer_queueMutex.unlock();
+    message_queueMutex.lock();
+    bool wasEmpty = message_queue.empty();
+    message_queue.push_back(answer);
+    message_queueMutex.unlock();
     if(wasEmpty){
         boost::system::error_code ec(0,boost::system::system_category());
         handle_write(ec);
@@ -108,35 +108,17 @@ template<class T> void AsyncEndpoint<T>::handle_write(const boost::system::error
     {
         message_queueMutex.lock();
         if(!message_queue.empty()){
-            NMEAmsg_ptr send_msg = message_queue.front();
-            int length = send_msg->toBuffer(data_send_,max_length,checksum);
+            Message_ptr send_msg = message_queue.front();
+            int length = send_msg->toBuffer(data_send_, max_length);
             message_queue.pop_front();
             message_queueMutex.unlock();
             boost::asio::async_write(*aostream, boost::asio::buffer(data_send_,length),
                                      boost::bind(&AsyncEndpoint::handle_write, this->shared_from_this(),
                                                  boost::asio::placeholders::error));
-            return;
         }
         else{
             message_queueMutex.unlock();
         }
-        
-        if(!answer_queue.empty()){
-            std::string answer = answer_queue.front();
-            int length = answer.length();
-            memcpy(data_send_,answer.c_str(),length);
-            answer_queue.pop_front();
-            answer_queueMutex.unlock();
-            boost::asio::async_write(*aostream, boost::asio::buffer(data_send_,length),
-                                     boost::bind(&AsyncEndpoint::handle_write, this->shared_from_this(),
-                                                 boost::asio::placeholders::error));
-            return;
-        }
-        else{
-            answer_queueMutex.unlock();
-        }
-
-        
     }
     else
     {

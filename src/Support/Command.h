@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "Message.h"
+#include "Answer.h"
 #include "CommandEndpoint.h"
 
 class CommandEndpoint;
@@ -29,6 +30,7 @@ public:
     const std::string getArguments()const{return this->arguments;}
     
     void answer(std::string message, Endpoint_ptr sender);
+    void answer(Answer::Type type, std::string message, Endpoint_ptr sender);
     
     const std::string to_str() const;
 private:
