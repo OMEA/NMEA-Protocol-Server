@@ -39,4 +39,3 @@ tcp::socket& TCPSession::socket()
 {
     return socket_;
 }
-

@@ -26,6 +26,13 @@ void TCPServer::handle_accept(TCPSession* new_session, const boost::system::erro
 {
     if (!error)
     {
+        boost::asio::ip::tcp::resolver resolver(new_session->socket().get_io_service());
+        boost::asio::ip::tcp::resolver::iterator host = resolver.resolve(new_session->socket().remote_endpoint());
+        
+        std::stringstream ss;
+        ss<<host->host_name() << ":" << "@tcp"<<port;
+        new_session->setSessionId(ss.str());
+        
         NMEAEndpoint_ptr ptr(new_session);
         new_session->start();
         new_session = new TCPSession(io_service_, port);

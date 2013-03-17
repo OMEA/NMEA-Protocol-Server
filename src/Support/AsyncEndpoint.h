@@ -26,17 +26,21 @@ class AsyncEndpoint: public NMEAEndpoint, public boost::enable_shared_from_this<
 public:
     using NMEAEndpoint::receive;
 public:
+    AsyncEndpoint();
     ~AsyncEndpoint();
     
     void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
     void handle_write(const boost::system::error_code& error);
-    void start();
-    void stop();
+    virtual void start();
+    virtual void stop();
     
     virtual void receive(Command_ptr command);
     
+    void setSessionId(std::string sessionId){this->sessionId = sessionId;}
+    std::string getSessionId(){return sessionId;}
 protected:
     void setAOStream(T* aostream){this->aostream=aostream;}
+    T* getAOStream(){return aostream;}
     void deliver_impl(NMEAmsg_ptr msg);
     void deliverAnswer_impl(Answer_ptr answer);
     virtual boost::shared_ptr<Endpoint> v_shared_from_this(){return this->shared_from_this();}
@@ -50,7 +54,14 @@ private:
     char data_[max_length];
     char data_send_[max_length];
     std::string data;
+    bool persist;
+    bool isActive;
+    std::string sessionId;
+private:
+    static std::map<std::string, boost::shared_ptr<AsyncEndpoint<T> > > sessions;
+public:
+    static void deactivateSession(boost::shared_ptr<AsyncEndpoint<T> > session);
+    static boost::shared_ptr<AsyncEndpoint<T> > activateSession(boost::shared_ptr<AsyncEndpoint<T> > session);
 };
-
 
 #endif /* defined(__NMEA_Protocol_Server__AsyncEndpoint__) */

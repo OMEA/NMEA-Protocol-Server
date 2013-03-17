@@ -22,7 +22,7 @@ public:
     virtual ~TCPSession();
     
     tcp::socket& socket();
-    
+
     std::string getId();
     
 private:
@@ -30,5 +30,6 @@ private:
     unsigned int port;
 };
 
+typedef boost::shared_ptr<TCPSession> TCPSession_ptr;
 
 #endif /* defined(__NMEA_Protocol_Server__TCPSession__) */

@@ -91,7 +91,7 @@ void NMEAEndpoint::receive(Command_ptr command){
         }
     }
     else{
-        command->answer(Answer::UNKNOWN_CMD, "Cannot understand command "+command->getCommand()+"\n", this->v_shared_from_this());
+        CommandEndpoint::receive(command);
     }
     //TODO: response generieren und bei endpoint delivern
 }

@@ -19,6 +19,7 @@ SerialPort::SerialPort(const std::string& devname,unsigned int baud_rate,
 error(false){
     
     open(devname,baud_rate,opt_parity,opt_csize,opt_flow,opt_stop);
+    setSessionId(devname);
 }
 
 SerialPort::~SerialPort()
