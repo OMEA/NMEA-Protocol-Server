@@ -8,8 +8,6 @@
 
 #include "NMEAServer.h"
 #include <boost/regex.hpp>
-#include <boost/asio.hpp>
-#include <boost/thread.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 #include "../TCP/TCPServer.h"
@@ -109,7 +107,7 @@ void NMEAServer::receiveCommand(Command_ptr command){
                 if(type=="file" || type=="File"){
                     try
                     {
-                        FileEndpoint::factory(args);
+                        FileEndpoint::factory(this->shared_from_this(), args);
                         command->answer("New file Endpoint successfully created\n", this->shared_from_this());
                     }
                     catch (std::exception& e)
@@ -120,12 +118,13 @@ void NMEAServer::receiveCommand(Command_ptr command){
                 else if(type=="tcp" || type=="TCP"){
                     try
                     {
-                        //IOService in endpoint und beim beenden stop() aufrufen
-                        boost::asio::io_service *io_service = new boost::asio::io_service();
-                        
-                        new TCPServer(*io_service, std::atoi(args.c_str()));
-                        //FileEndpoint::factory(args);
-                        boost::thread bt(boost::bind(&boost::asio::io_service::run, io_service));
+//                        //IOService in endpoint und beim beenden stop() aufrufen
+//                        boost::asio::io_service *io_service = new boost::asio::io_service();
+//                        
+//                        new TCPServer(this->shared_from_this(), *io_service, std::atoi(args.c_str()));
+//                        //FileEndpoint::factory(args);
+//                        boost::thread bt(boost::bind(&boost::asio::io_service::run, io_service));
+                        TCPServer::factory(this->shared_from_this(), std::atoi(args.c_str()));
                         command->answer("New tcp Endpoint successfully created\n", this->shared_from_this());
                     }
                     catch (std::exception& e)

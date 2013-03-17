@@ -21,6 +21,8 @@ typedef boost::shared_ptr<Command> Command_ptr;
 class CommandEndpoint: public Endpoint
 {
 public:
+    CommandEndpoint(){}
+    CommandEndpoint(boost::shared_ptr<Endpoint> connectedTo);
     virtual ~CommandEndpoint(){}
     virtual void receive(Command_ptr command);
     virtual void deliver(Command_ptr command);

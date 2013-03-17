@@ -27,6 +27,7 @@ public:
     using NMEAEndpoint::receive;
 public:
     AsyncEndpoint();
+    AsyncEndpoint(boost::shared_ptr<Endpoint> connectedTo);
     ~AsyncEndpoint();
     
     void handle_read(const boost::system::error_code& error, size_t bytes_transferred);

@@ -23,6 +23,11 @@ TCPSession::TCPSession(boost::asio::io_service& io_service, unsigned int port): 
     setAOStream(&socket_);
 }
 
+TCPSession::TCPSession(boost::shared_ptr<Endpoint> connectedTo, boost::asio::io_service& io_service, unsigned int port): AsyncEndpoint<boost::asio::ip::tcp::socket>(connectedTo), socket_(io_service), port(port)
+{
+    setAOStream(&socket_);
+}
+
 TCPSession::~TCPSession(){
 }
 

@@ -42,7 +42,7 @@ int main(int argc, const char * argv[])
     srv = NMEAServer::getInstance();
     boost::thread workerThread(&NMEAServer::run, srv);
     std::cout << "Serverthread started" << std::endl;
-    ConfigEndpoint::factory("default");
+    ConfigEndpoint::factory(srv, "default");
     std::cout << "default config loaded" << std::endl;
     
     

@@ -18,6 +18,14 @@ template<class T> AsyncEndpoint<T>::AsyncEndpoint(){
     isActive=false;
     message_queue_size=10;
 }
+
+template<class T> AsyncEndpoint<T>::AsyncEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo)
+{
+    persist=false;
+    isActive=false;
+    message_queue_size=10;
+}
+
 template<class T> AsyncEndpoint<T>::~AsyncEndpoint(){
 }
 
@@ -65,7 +73,6 @@ template<class T> void AsyncEndpoint<T>::receive(Command_ptr command){
             }
         }
     }
-
     else{
         NMEAEndpoint::receive(command);
     }

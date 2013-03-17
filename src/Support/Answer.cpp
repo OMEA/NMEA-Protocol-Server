@@ -8,7 +8,7 @@
 
 #include "Answer.h"
 
-Answer::Answer(Answer::Type type, std::string parseMessage, Endpoint_ptr sender): Message(sender), type(type){
+Answer::Answer(Answer::Type type, std::string parseMessage, Endpoint_ptr sender, boost::shared_ptr<Command> origin_cmd): Message(sender), origin_cmd(origin_cmd), type(type){
     trim(parseMessage);
     setMessage(parseMessage);
 }

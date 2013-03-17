@@ -22,11 +22,12 @@
 
 class FileEndpoint : public NMEAEndpoint, public boost::enable_shared_from_this<FileEndpoint>{
 public:
-    static boost::shared_ptr<FileEndpoint> factory(std::string filename=std::string(""));
+    static boost::shared_ptr<FileEndpoint> factory(boost::shared_ptr<Endpoint> connectedTo, std::string filename=std::string(""));
 public:
     using NMEAEndpoint::receive;
 public:
     FileEndpoint();
+    FileEndpoint(boost::shared_ptr<Endpoint> connectedTo);
     virtual ~FileEndpoint();
     void open(std::string filename);
     void close();

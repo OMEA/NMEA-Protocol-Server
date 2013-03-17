@@ -9,6 +9,10 @@
 #include "Endpoint.h"
 #include "../NMEA/NMEAServer.h"
 
+Endpoint::Endpoint(boost::shared_ptr<Endpoint> connectedTo){
+    setConnectedTo(connectedTo);
+}
+
 void Endpoint::registerEndpoint(){
     NMEAServer::getInstance()->addEndpoint(this->v_shared_from_this());
     NMEAServer::getInstance()->endpointOnline(this->v_shared_from_this());

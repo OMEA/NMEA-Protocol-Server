@@ -8,7 +8,12 @@
 
 #include "NMEAEndpoint.h"
 
-#include "NMEAServer.h"
+NMEAEndpoint::NMEAEndpoint(boost::shared_ptr<Endpoint> connectedTo): CommandEndpoint(connectedTo){
+    input=true;
+    output=true;
+    portmirror=false;
+    checksum=true;
+}
 
 NMEAEndpoint::NMEAEndpoint(){
     input=true;
@@ -30,7 +35,13 @@ void NMEAEndpoint::receive(NMEAmsg_ptr msg){
 
 void NMEAEndpoint::receive_impl(NMEAmsg_ptr msg){
     msg->setSender(this->v_shared_from_this());
-    NMEAServer::getInstance()->receive(msg);
+    NMEAEndpoint_ptr nmeaEndpoint = boost::dynamic_pointer_cast<NMEAEndpoint>(getConnectedTo());
+    if(nmeaEndpoint){
+        nmeaEndpoint->receive(msg);
+    }
+    else{
+        std::cerr << "Cannot send NMEA to none NMEAEndpoint" << std::endl;
+    }
 }
 
 void NMEAEndpoint::receive(Command_ptr command){

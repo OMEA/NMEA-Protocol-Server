@@ -25,6 +25,7 @@ public:
     
 public:
     NMEAEndpoint();
+    NMEAEndpoint(boost::shared_ptr<Endpoint> connectedTo);
     virtual ~NMEAEndpoint(){}
     virtual void deliver(NMEAmsg_ptr msg);
     virtual void receive(NMEAmsg_ptr msg);

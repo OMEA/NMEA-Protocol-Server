@@ -16,12 +16,18 @@
 class Endpoint
 {
 public:
+    Endpoint(){}
+    Endpoint(boost::shared_ptr<Endpoint> connectedTo);
     virtual ~Endpoint(){}
     virtual std::string getId()=0;
 protected:
     virtual void registerEndpoint();
     virtual void unregisterEndpoint();
     virtual boost::shared_ptr<Endpoint> v_shared_from_this()=0;
+    void setConnectedTo(boost::shared_ptr<Endpoint> connectedTo){this->connectedTo=connectedTo;}
+    boost::shared_ptr<Endpoint> getConnectedTo(){return connectedTo;}
+private:
+    boost::shared_ptr<Endpoint> connectedTo;
 };
 
 typedef boost::shared_ptr<Endpoint> Endpoint_ptr;

@@ -19,6 +19,7 @@ class TCPSession : public AsyncEndpoint<boost::asio::ip::tcp::socket>
 {
 public:
     TCPSession(boost::asio::io_service& io_service, unsigned int port);
+    TCPSession(boost::shared_ptr<Endpoint> connectedTo, boost::asio::io_service& io_service, unsigned int port);
     virtual ~TCPSession();
     
     tcp::socket& socket();

@@ -10,8 +10,8 @@
 #include "../NMEA/NMEAServer.h"
 #include <boost/regex.hpp>
 
-boost::shared_ptr<FileEndpoint> FileEndpoint::factory(std::string filename) {
-    FileEndpoint_ptr fileEndpoint(new FileEndpoint);
+boost::shared_ptr<FileEndpoint> FileEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo, std::string filename) {
+    FileEndpoint_ptr fileEndpoint(new FileEndpoint(connectedTo));
     fileEndpoint->open(filename);
     return fileEndpoint;
 }
@@ -116,6 +116,11 @@ void FileEndpoint::play(boost::posix_time::ptime from,  boost::posix_time::ptime
 
 void FileEndpoint::deliverAnswer_impl(Answer_ptr answer){
     //TODO: maybe write answers to file?
+}
+
+FileEndpoint::FileEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo){
+    playback=false;
+    stopPlaybackNow=true;
 }
 
 FileEndpoint::FileEndpoint(){

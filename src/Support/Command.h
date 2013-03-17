@@ -18,7 +18,7 @@
 class CommandEndpoint;
 typedef boost::shared_ptr<CommandEndpoint> CommandEndpoint_ptr;
 
-class Command: public Message
+class Command: public Message, public boost::enable_shared_from_this<Command>
 {
 public:
     Command(std::string parseCommand, Endpoint_ptr sender);

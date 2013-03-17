@@ -15,8 +15,8 @@
 #include "ConfigEndpoint.h"
 #include "../NMEA/NMEAServer.h"
 
-boost::shared_ptr<ConfigEndpoint> ConfigEndpoint::factory(std::string configname) {
-    ConfigEndpoint_ptr configEndpoint(new ConfigEndpoint);
+boost::shared_ptr<ConfigEndpoint> ConfigEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo, std::string configname) {
+    ConfigEndpoint_ptr configEndpoint(new ConfigEndpoint(connectedTo));
     configEndpoint->load(configname);
     return configEndpoint;
 }
@@ -77,9 +77,13 @@ void ConfigEndpoint::receive(Command_ptr command){
 }
 
 void ConfigEndpoint::deliverAnswer_impl(Answer_ptr answer){
+    std::cout<<getId()<<":"<<*answer->getOriginCmd()<<std::endl;
     if(answer->getType()!=Answer::UNKNOWN_RECEIVER){
         std::cout<<getId()<<":"<<*answer;
     }
+}
+
+ConfigEndpoint::ConfigEndpoint(boost::shared_ptr<Endpoint> connectedTo): CommandEndpoint(connectedTo){
 }
 
 ConfigEndpoint::ConfigEndpoint(){
@@ -113,7 +117,6 @@ void ConfigEndpoint::load(std::string configname){
     file_stream.close();
     registerEndpoint();
     for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command) {
-        std::cout<<getId()<<":"<<(**command)<<std::endl;
         deliver(*command);
     }
  }
