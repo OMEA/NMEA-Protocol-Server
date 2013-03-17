@@ -118,12 +118,6 @@ void NMEAServer::receiveCommand(Command_ptr command){
                 else if(type=="tcp" || type=="TCP"){
                     try
                     {
-//                        //IOService in endpoint und beim beenden stop() aufrufen
-//                        boost::asio::io_service *io_service = new boost::asio::io_service();
-//                        
-//                        new TCPServer(this->shared_from_this(), *io_service, std::atoi(args.c_str()));
-//                        //FileEndpoint::factory(args);
-//                        boost::thread bt(boost::bind(&boost::asio::io_service::run, io_service));
                         TCPServer::factory(this->shared_from_this(), std::atoi(args.c_str()));
                         command->answer("New tcp Endpoint successfully created\n", this->shared_from_this());
                     }

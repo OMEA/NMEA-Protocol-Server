@@ -14,16 +14,16 @@
 #include <boost/lexical_cast.hpp>
 
 template<class T> AsyncEndpoint<T>::AsyncEndpoint(){
-    persist=false;
+    registerBoolCmd("persist", &persist, false, true);
+    registerUIntCmd("queue_size", &message_queue_size, 10, 0, 65535, true);
     isActive=false;
-    message_queue_size=10;
 }
 
 template<class T> AsyncEndpoint<T>::AsyncEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo)
 {
-    persist=false;
+    registerBoolCmd("persist", &persist, false, true);
+    registerUIntCmd("queue_size", &message_queue_size, 10, 0, 65535, true);
     isActive=false;
-    message_queue_size=10;
 }
 
 template<class T> AsyncEndpoint<T>::~AsyncEndpoint(){
@@ -38,39 +38,6 @@ template<class T> void AsyncEndpoint<T>::receive(Command_ptr command){
         catch (std::exception& e)
         {
             std::cerr << "TCPSession Exception: " << e.what() << "\n";
-        }
-    }
-    else if(command->getCommand()=="persist"){
-        if(command->getArguments()=="on"){
-            persist=true;
-            command->answer("persist is now turned on\n", this->shared_from_this());
-        }
-        else if(command->getArguments()=="off"){
-            persist=false;
-            command->answer("persist is now turned off\n", this->shared_from_this());
-        }
-        else{
-            command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->shared_from_this());
-        }
-    }
-    else if(command->getCommand()=="queue_size"){
-        if(command->getArguments().length()==0){
-            std::stringstream ss;
-            ss<<"Maximum Queue size is " << message_queue_size << "\n";
-            command->answer(ss.str(), this->shared_from_this());
-        }
-        else{
-            try
-            {
-                message_queue_size = boost::lexical_cast<unsigned int>(command->getArguments());
-                std::stringstream ss;
-                ss<<"Maximum Queue size changed to " << message_queue_size << "\n";
-                command->answer(ss.str(), this->shared_from_this());
-            }
-            catch(const boost::bad_lexical_cast&)
-            {
-                command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+". Not a number!\n", this->shared_from_this());
-            }
         }
     }
     else{
