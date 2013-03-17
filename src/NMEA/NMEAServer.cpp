@@ -69,7 +69,7 @@ void NMEAServer::receive(Answer_ptr msg){
 void NMEAServer::receive(Message_ptr msg){
     boost::mutex::scoped_lock lock(msgsMutex);
     msgs.push_back(msg);
-    msgsCond.notify_all();
+    msgsCond.notify_one();
 }
 
 void NMEAServer::receiveCommand(Command_ptr command){
@@ -149,9 +149,10 @@ void NMEAServer::run(){
         std::list<Message_ptr> msgs_cpy;
         {
             boost::mutex::scoped_lock lock(msgsMutex);
-            msgsCond.wait(lock);
+            if(msgs.empty()){
+                msgsCond.wait(lock);
+            }
             msgs_cpy = std::list<Message_ptr>(msgs);
-            
         }
         while(!msgs_cpy.empty()){
             std::list<Endpoint_ptr> online_cpy;
@@ -204,5 +205,5 @@ void NMEAServer::run(){
 
 void NMEAServer::stop(){
     shouldRun=false;
-    msgsCond.notify_all();
+    msgsCond.notify_one();
 }
