@@ -157,7 +157,7 @@ void NMEAServer::run(){
         while(!msgs_cpy.empty()){
             std::list<Endpoint_ptr> online_cpy;
             {
-                boost::mutex::scoped_lock lock(msgsMutex);
+                boost::mutex::scoped_lock lock(onlineMutex);
                 online_cpy = std::list<Endpoint_ptr>(online);
             }
             if(NMEAmsg_ptr tmp_msg = boost::dynamic_pointer_cast<NMEAmsg>(msgs_cpy.front())){

@@ -27,11 +27,16 @@ TCPSession::~TCPSession(){
 }
 
 std::string TCPSession::getId(){
-    boost::asio::ip::tcp::resolver resolver(socket_.get_io_service());
-    boost::asio::ip::tcp::resolver::iterator host = resolver.resolve(socket_.remote_endpoint());
-    
     std::stringstream ss;
-    ss<<host->host_name() << ":" << socket_.remote_endpoint().port()<< "@tcp"<<port;
+    try{
+        boost::asio::ip::tcp::resolver resolver(socket_.get_io_service());
+        boost::asio::ip::tcp::resolver::iterator host = resolver.resolve(socket_.remote_endpoint());
+    
+        ss<<host->host_name() << ":" << socket_.remote_endpoint().port()<< "@tcp"<<port;
+    }
+    catch (std::exception& e){
+        ss<< "inactive_socket@tcp"<<port;
+    }
     return ss.str();
 }
 

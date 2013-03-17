@@ -11,10 +11,12 @@
 #include "AsyncEndpoint.h"
 
 #include "../NMEA/NMEAServer.h"
+#include <boost/lexical_cast.hpp>
 
 template<class T> AsyncEndpoint<T>::AsyncEndpoint(){
     persist=false;
     isActive=false;
+    message_queue_size=10;
 }
 template<class T> AsyncEndpoint<T>::~AsyncEndpoint(){
 }
@@ -43,6 +45,27 @@ template<class T> void AsyncEndpoint<T>::receive(Command_ptr command){
             command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+"\n", this->shared_from_this());
         }
     }
+    else if(command->getCommand()=="queue_size"){
+        if(command->getArguments().length()==0){
+            std::stringstream ss;
+            ss<<"Maximum Queue size is " << message_queue_size << "\n";
+            command->answer(ss.str(), this->shared_from_this());
+        }
+        else{
+            try
+            {
+                message_queue_size = boost::lexical_cast<unsigned int>(command->getArguments());
+                std::stringstream ss;
+                ss<<"Maximum Queue size changed to " << message_queue_size << "\n";
+                command->answer(ss.str(), this->shared_from_this());
+            }
+            catch(const boost::bad_lexical_cast&)
+            {
+                command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+". Not a number!\n", this->shared_from_this());
+            }
+        }
+    }
+
     else{
         NMEAEndpoint::receive(command);
     }
@@ -50,14 +73,22 @@ template<class T> void AsyncEndpoint<T>::receive(Command_ptr command){
 
 template<class T> void AsyncEndpoint<T>::deliver_impl(NMEAmsg_ptr msg){
     bool wasEmpty = true;
+    bool wasFull = false;
     {
         boost::mutex::scoped_lock lock(message_queueMutex);
         wasEmpty = message_queue.empty();
+        while(message_queue.size()>=message_queue_size){
+            message_queue.pop_front();
+            wasFull=true;
+        }
         message_queue.push_back(msg);
     }
     if(wasEmpty){
         boost::system::error_code ec(0,boost::system::system_category());
         handle_write(ec);
+    }
+    else if(wasFull){
+        std::cerr << "The message queue for "<<getSessionId()<<" was too small, old messages were lost!"<<std::endl;
     }
 }
 
@@ -119,7 +150,6 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
     }
     else
     {
-        std::cerr << error.message() << ":" << std::endl;
         if(persist){
             AsyncEndpoint<T>::deactivateSession(this->shared_from_this());
             std::cout << "Session deactivated"<<std::endl;
