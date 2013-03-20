@@ -22,9 +22,10 @@ class ConfigEndpoint : public CommandEndpoint, public boost::enable_shared_from_
     
 public:
     static boost::shared_ptr<ConfigEndpoint> factory(boost::shared_ptr<Endpoint> connectedTo, std::string configname=std::string(""));
-public:
+protected:
     ConfigEndpoint();
     ConfigEndpoint(boost::shared_ptr<Endpoint> connectedTo);
+public:
     virtual ~ConfigEndpoint();
     void load(std::string filename);
     void save(std::string filename=std::string(""));

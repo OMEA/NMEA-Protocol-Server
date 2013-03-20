@@ -38,6 +38,11 @@ NMEAmsg::NMEAmsg(std::string parseMsg, Endpoint_ptr sender): Message(sender){
     }
 }
 
+std::size_t NMEAmsg::hash_value(){
+    boost::hash<std::string> hasher;
+    return hasher(id+msg);
+}
+
 const char * NMEAmsg::data(bool checksum) const{
     //todo checksum
     return to_str().c_str();
@@ -57,8 +62,8 @@ const size_t NMEAmsg::length(bool checksum) const{
 const std::string NMEAmsg::to_str() const {
     //TODO
     bool checksum = true;
-    std::stringstream ss1;
-    std::stringstream ss2;
+    std::ostringstream ss1;
+    std::ostringstream ss2;
     ss2 << this->id << "," << this->msg;
     if(checksum){
         std::string tmpString = ss2.str();

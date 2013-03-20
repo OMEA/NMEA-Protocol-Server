@@ -25,17 +25,19 @@ template <class T>
 class AsyncEndpoint: public NMEAEndpoint, public boost::enable_shared_from_this< AsyncEndpoint<T> >{
 public:
     using NMEAEndpoint::receive;
-public:
+protected:
     AsyncEndpoint();
     AsyncEndpoint(boost::shared_ptr<Endpoint> connectedTo);
+    virtual void initialize();
+private:
+    void exit_cmd(Command_ptr command);
+public:
     ~AsyncEndpoint();
     
     void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
     void handle_write(const boost::system::error_code& error);
     virtual void start();
     virtual void stop();
-    
-    virtual void receive(Command_ptr command);
     
     void setSessionId(std::string sessionId){this->sessionId = sessionId;}
     std::string getSessionId(){return sessionId;}
@@ -52,7 +54,7 @@ private:
     boost::condition_variable message_queueCond;
     boost::mutex message_queueMutex;
     unsigned int message_queue_size;
-    enum { max_length = 1024 };
+    enum { max_length = 8192 };
     char data_[max_length];
     char data_send_[max_length];
     std::string data;

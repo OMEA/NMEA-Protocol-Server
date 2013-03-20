@@ -12,6 +12,7 @@
 
 boost::shared_ptr<FileEndpoint> FileEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo, std::string filename) {
     FileEndpoint_ptr fileEndpoint(new FileEndpoint(connectedTo));
+    fileEndpoint->initialize();
     fileEndpoint->open(filename);
     return fileEndpoint;
 }
@@ -119,11 +120,6 @@ void FileEndpoint::deliverAnswer_impl(Answer_ptr answer){
 }
 
 FileEndpoint::FileEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo){
-    playback=false;
-    stopPlaybackNow=true;
-}
-
-FileEndpoint::FileEndpoint(){
     playback=false;
     stopPlaybackNow=true;
 }

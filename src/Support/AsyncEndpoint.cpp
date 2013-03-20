@@ -13,35 +13,32 @@
 #include "../NMEA/NMEAServer.h"
 #include <boost/lexical_cast.hpp>
 
-template<class T> AsyncEndpoint<T>::AsyncEndpoint(){
-    registerBoolCmd("persist", &persist, false, true);
-    registerUIntCmd("queue_size", &message_queue_size, 10, 0, 65535, true);
-    isActive=false;
-}
+template<class T> AsyncEndpoint<T>::AsyncEndpoint(){}
 
-template<class T> AsyncEndpoint<T>::AsyncEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo)
-{
-    registerBoolCmd("persist", &persist, false, true);
-    registerUIntCmd("queue_size", &message_queue_size, 10, 0, 65535, true);
+template<class T> AsyncEndpoint<T>::AsyncEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo){}
+
+template<class T> void AsyncEndpoint<T>::initialize(){
+    NMEAEndpoint::initialize();
+    
+    registerBoolCmd("persist" ,"Session persistance", "When on, messages are stored after a disconnect and after the reconnect replayed. See also [queue_size]", &persist, false, true);
+    registerUIntCmd("queue_size","Message Queue Size", "Defines the maximum size of the message queue for this endpoint. See also [persist]", &message_queue_size, 10, 0, 65535, true);
+    boost::function<void (Command_ptr)> func = boost::bind(&AsyncEndpoint<T>::exit_cmd, this, _1);
+    registerVoidCmd("exit","End Session", "Ends the session and disconnects the remote host. Command does not take any arguments.",  func);
+    
     isActive=false;
 }
 
 template<class T> AsyncEndpoint<T>::~AsyncEndpoint(){
 }
 
-template<class T> void AsyncEndpoint<T>::receive(Command_ptr command){
-    if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
-        try
-        {
-            aostream->close();
-        }
-        catch (std::exception& e)
-        {
-            std::cerr << "TCPSession Exception: " << e.what() << "\n";
-        }
+template<class T> void AsyncEndpoint<T>::exit_cmd(Command_ptr command){
+    try
+    {
+        aostream->close();
     }
-    else{
-        NMEAEndpoint::receive(command);
+    catch (std::exception& e)
+    {
+        std::cerr << "TCPSession Exception: " << e.what() << "\n";
     }
 }
 

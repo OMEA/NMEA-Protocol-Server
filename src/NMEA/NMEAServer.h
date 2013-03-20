@@ -17,16 +17,16 @@
 #include "../Support/Command.h"
 #include "../Support/IOServicePool.h"
 #include "NMEAmsg.h"
-#include "NMEAEndpoint.h"
+#include "NMEAMidpoint.h"
 
 class NMEAServer;
 typedef boost::shared_ptr<NMEAServer> NMEAServer_ptr;
 
-class NMEAServer: public NMEAEndpoint, public boost::enable_shared_from_this<NMEAServer>
+class NMEAServer: public NMEAMidpoint, public boost::enable_shared_from_this<NMEAServer>
 {
 public:
-    //using NMEAEndpoint::receive;
-    //using CommandEndpoint::receive;
+    using NMEAEndpoint::deliver;
+    using NMEAMidpoint::deliver;
 private:
     std::list<Message_ptr> msgs;
     boost::condition_variable msgsCond;
@@ -54,13 +54,16 @@ public:
     virtual void receive(Command_ptr msg);
     virtual void receive(NMEAmsg_ptr msg);
     virtual void receive(Answer_ptr msg);
+    virtual void deliver(Command_ptr command);
     
-    void addEndpoint(Endpoint_ptr endpoint);
-    void removeEndpoint(Endpoint_ptr endpoint);
-    void endpointOnline(Endpoint_ptr endpoint);
-    void endpointOffline(Endpoint_ptr endpoint);
     virtual std::string getId(){return std::string("server");}
     ~NMEAServer(void){}
+public:
+    virtual void addEndpoint(Endpoint_ptr endpoint);
+    virtual void removeEndpoint(Endpoint_ptr endpoint);
+    virtual void endpointOnline(Endpoint_ptr endpoint);
+    virtual void endpointOffline(Endpoint_ptr endpoint);
+    
 public:
     static NMEAServer_ptr getInstance();
 

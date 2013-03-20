@@ -37,6 +37,7 @@ public:
     const char *data(bool checksum=false) const;
     const size_t length(bool checksum=false) const;
     
+    std::size_t hash_value();
 private:
     char start;
     std::string id;

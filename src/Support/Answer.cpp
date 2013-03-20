@@ -14,7 +14,7 @@ Answer::Answer(Answer::Type type, std::string parseMessage, Endpoint_ptr sender,
 }
 
 const std::string Answer::to_str() const {
-    std::stringstream ss;
-    ss << getSender()->getId()<<':'<<getMessage() << '\r' << '\n';
+    std::ostringstream ss;
+    ss << getSender()->getId()<< " ->> "<<getMessage() << '\r' << '\n';
     return ss.str();
 }

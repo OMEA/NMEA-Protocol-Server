@@ -18,8 +18,11 @@ using boost::asio::ip::tcp;
 class TCPSession : public AsyncEndpoint<boost::asio::ip::tcp::socket>
 {
 public:
+    static TCPSession* factory(boost::shared_ptr<Endpoint> connectedTo, boost::asio::io_service& io_service, unsigned int port);
+protected:
     TCPSession(boost::asio::io_service& io_service, unsigned int port);
     TCPSession(boost::shared_ptr<Endpoint> connectedTo, boost::asio::io_service& io_service, unsigned int port);
+public:
     virtual ~TCPSession();
     
     tcp::socket& socket();

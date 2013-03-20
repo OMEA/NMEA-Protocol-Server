@@ -9,7 +9,17 @@
 #include "CommandEndpoint.h"
 #include "../NMEA/NMEAServer.h"
 
-CommandEndpoint::CommandEndpoint(boost::shared_ptr<Endpoint> connectedTo): Endpoint(connectedTo){
+#include <boost/bind.hpp>
+
+CommandEndpoint::CommandEndpoint(boost::shared_ptr<Endpoint> connectedTo): Endpoint(connectedTo){}
+
+void CommandEndpoint::initialize(){
+    boost::function<void (Command_ptr)> func = boost::bind(&CommandEndpoint::id_cmd, this, _1);
+    registerVoidCmd("id","Identifier", "The identifier of the endpoint. The property is read-only.",  func);
+}
+
+void CommandEndpoint::id_cmd(Command_ptr command){
+    command->answer(getId()+"\n", this->v_shared_from_this());
 }
 
 void CommandEndpoint::deliver(Command_ptr command){
@@ -17,12 +27,17 @@ void CommandEndpoint::deliver(Command_ptr command){
         receive(command);
     }
     else{
-        CommandEndpoint_ptr cmdEndpoint = boost::dynamic_pointer_cast<CommandEndpoint>(getConnectedTo());
-        if(cmdEndpoint){
-            cmdEndpoint->receive(command);
+        if(!getConnectedTo()){
+            std::cerr << getId()<<": Endpoint is unconnected" << std::endl;
         }
         else{
-            std::cerr << getId()<<":Cannot send Command to none CommandEndpoint" << std::endl;
+            CommandEndpoint_ptr cmdEndpoint = boost::dynamic_pointer_cast<CommandEndpoint>(getConnectedTo());
+            if(cmdEndpoint){
+                cmdEndpoint->deliver(command);
+            }
+            else{
+                std::cerr << getId()<<":deliver Cannot send Command to none CommandEndpoint" << std::endl;
+            }
         }
     }
 }
@@ -32,7 +47,15 @@ void CommandEndpoint::deliver(Answer_ptr answer){
 }
 
 void CommandEndpoint::receive(Command_ptr command){
-    if(registred_commands.find(command->getCommand())!=registred_commands.end()){
+    if(command->getCommand()=="list_commands"){
+        std::ostringstream ss;
+        ss << "you can call the following commands on "<<getId()<<std::endl << "---------------------------------------" << std::endl;
+        for (std::map<std::string,Callback_ptr>::iterator registred_command=registred_commands.begin(); registred_command!=registred_commands.end(); ++registred_command){
+            ss << *(registred_command->second) << std::endl;
+        }
+        command->answer(ss.str(), this->v_shared_from_this());
+    }
+    else if(registred_commands.find(command->getCommand())!=registred_commands.end()){
         std::pair<std::string,Callback_ptr> registred_command = *(registred_commands.find(command->getCommand()));
         registred_command.second->execute(command, boost::static_pointer_cast<CommandEndpoint>(this->v_shared_from_this()));
     }
@@ -48,14 +71,30 @@ void CommandEndpoint::registerEndpoint(){
     deliver(has_commands);
 }
 
-void CommandEndpoint::registerBoolCmd(std::string name, bool *boolean, bool defaultValue, bool writeable){
+void CommandEndpoint::registerBoolCmd(std::string name, std::string speakingName, std::string description, bool *boolean, bool defaultValue, bool writeable){
     *boolean=defaultValue;
-    Callback_ptr callback(new BoolCallback(name, boolean, writeable));
+    Callback_ptr callback(new BoolCallback(name, speakingName, description, boolean, writeable));
     registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
 }
 
-void CommandEndpoint::registerUIntCmd(std::string name, unsigned int *uint, unsigned int defaultValue, unsigned int min, unsigned int max, bool writeable){
+void CommandEndpoint::registerUIntCmd(std::string name, std::string speakingName, std::string description, unsigned int *uint, unsigned int defaultValue, unsigned int min, unsigned int max, bool writeable){
     *uint=defaultValue;
-    Callback_ptr callback(new UIntCallback(name, uint, min, max, writeable));
+    Callback_ptr callback(new UIntCallback(name, speakingName, description, uint, min, max, writeable));
+    registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
+}
+
+void CommandEndpoint::registerIntCmd(std::string name, std::string speakingName, std::string description, int *int_, int defaultValue, int min, int max, bool writeable){
+    *int_=defaultValue;
+    Callback_ptr callback(new IntCallback(name, speakingName, description, int_, min, max, writeable));
+    registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
+}
+
+void CommandEndpoint::registerStringVectorCmd(std::string name, std::string speakingName, std::string description, std::vector<std::string> *vector, bool writeable){
+    Callback_ptr callback(new StringVectorCallback(name, speakingName, description, vector, writeable));
+    registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
+}
+
+void CommandEndpoint::registerVoidCmd(std::string name, std::string speakingName, std::string description, boost::function<void (Command_ptr)> &func){
+    Callback_ptr callback(new VoidCallback(name, speakingName, description, func));
     registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
 }

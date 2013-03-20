@@ -25,9 +25,9 @@ public:
     static boost::shared_ptr<FileEndpoint> factory(boost::shared_ptr<Endpoint> connectedTo, std::string filename=std::string(""));
 public:
     using NMEAEndpoint::receive;
-public:
-    FileEndpoint();
+protected:
     FileEndpoint(boost::shared_ptr<Endpoint> connectedTo);
+public:
     virtual ~FileEndpoint();
     void open(std::string filename);
     void close();

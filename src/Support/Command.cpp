@@ -39,8 +39,8 @@ Command::Command(std::string parseCommand, Endpoint_ptr sender): Message(sender)
 }
 
 const std::string Command::to_str() const {
-    std::stringstream ss;
-    std::stringstream ss2;
+    std::ostringstream ss;
+    std::ostringstream ss2;
     if(getReceiver().length()>0){
         ss << '#' << getReceiver();
     }

@@ -18,6 +18,12 @@
 
 using boost::asio::ip::tcp;
 
+TCPSession* TCPSession::factory(boost::shared_ptr<Endpoint> connectedTo, boost::asio::io_service& io_service, unsigned int port) {
+    TCPSession* tcpSession = new TCPSession(connectedTo, io_service, port);
+    tcpSession->initialize();
+    return tcpSession;
+}
+
 TCPSession::TCPSession(boost::asio::io_service& io_service, unsigned int port): socket_(io_service), port(port)
 {
     setAOStream(&socket_);
@@ -32,7 +38,7 @@ TCPSession::~TCPSession(){
 }
 
 std::string TCPSession::getId(){
-    std::stringstream ss;
+    std::ostringstream ss;
     try{
         boost::asio::ip::tcp::resolver resolver(socket_.get_io_service());
         boost::asio::ip::tcp::resolver::iterator host = resolver.resolve(socket_.remote_endpoint());

@@ -70,13 +70,22 @@ void NMEAServer::receive(Message_ptr msg){
     msgsCond.notify_one();
 }
 
+void NMEAServer::deliver(Command_ptr command){
+    if((*command).getReceiver()=="server"){
+        receiveCommand(command);
+    }
+    else{
+        receive(command);
+    }
+}
+
 void NMEAServer::receiveCommand(Command_ptr command){
         if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
             //TODO call exit on all endpoints
             raise(SIGTERM);
         }
         else if(command->getCommand()=="endpoints"){
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << "Currently " << online.size() << " endpoints connected" << std::endl << "---------------------------------------" << std::endl;
             for (std::list<Endpoint_ptr>::const_iterator endpoint = online.begin(), end = online.end(); endpoint != end; ++endpoint) {
                 ss << (*endpoint)->getId() << std::endl;
@@ -132,7 +141,7 @@ void NMEAServer::receiveCommand(Command_ptr command){
             }
         }
         else{
-            command->answer(Answer::UNKNOWN_CMD, "Cannot understand command "+command->getCommand()+"\n", this->shared_from_this());
+            CommandEndpoint::receive(command);
         }
 }
 

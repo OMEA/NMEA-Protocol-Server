@@ -15,11 +15,15 @@
 
 class Endpoint
 {
-public:
-    Endpoint(){}
+protected:
+    Endpoint(){connectedTo=boost::shared_ptr<Endpoint>();}
     Endpoint(boost::shared_ptr<Endpoint> connectedTo);
+    virtual void initialize()=0;
+public:
     virtual ~Endpoint(){}
     virtual std::string getId()=0;
+    
+    
 protected:
     virtual void registerEndpoint();
     virtual void unregisterEndpoint();

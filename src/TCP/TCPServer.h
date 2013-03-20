@@ -23,10 +23,9 @@ class TCPServer: public CommandEndpoint, public boost::enable_shared_from_this<T
 {
 public:
     static boost::shared_ptr<TCPServer> factory(boost::shared_ptr<Endpoint> connectedTo, short port=10110);
-public:
-    TCPServer(boost::asio::io_service& io_service, short port);
+protected:
     TCPServer(boost::shared_ptr<Endpoint> connectedTo, boost::asio::io_service& io_service, short port);
-    
+public:    
     void handle_accept(TCPSession* new_session, const boost::system::error_code& error);
     
     virtual std::string getId();

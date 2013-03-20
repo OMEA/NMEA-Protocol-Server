@@ -17,9 +17,14 @@
 
 boost::shared_ptr<ConfigEndpoint> ConfigEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo, std::string configname) {
     ConfigEndpoint_ptr configEndpoint(new ConfigEndpoint(connectedTo));
+    configEndpoint->initialize();
     configEndpoint->load(configname);
     return configEndpoint;
 }
+
+ConfigEndpoint::ConfigEndpoint(boost::shared_ptr<Endpoint> connectedTo): CommandEndpoint(connectedTo){}
+
+ConfigEndpoint::ConfigEndpoint(){}
 
 void ConfigEndpoint::receive(Command_ptr command){
     if(command->getCommand()=="exit" || command->getCommand()=="logout" || command->getCommand()=="close"){
@@ -64,7 +69,7 @@ void ConfigEndpoint::receive(Command_ptr command){
             
     }
     else if(command->getCommand()=="list"){
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "Currently " << commands.size() << " commands in config" << std::endl << "---------------------------------------" << std::endl;
         for (std::list<Command_ptr>::const_iterator commandi = commands.begin(), end = commands.end(); commandi != end; ++commandi) {
             ss << (*commandi)->to_str() << '\n';
@@ -83,11 +88,7 @@ void ConfigEndpoint::deliverAnswer_impl(Answer_ptr answer){
     }
 }
 
-ConfigEndpoint::ConfigEndpoint(boost::shared_ptr<Endpoint> connectedTo): CommandEndpoint(connectedTo){
-}
 
-ConfigEndpoint::ConfigEndpoint(){
-}
 
 ConfigEndpoint::~ConfigEndpoint(){
     //close();
