@@ -71,6 +71,10 @@ void CommandEndpoint::registerEndpoint(){
     deliver(has_commands);
 }
 
+void CommandEndpoint::unregisterCmd(std::string name){
+    registred_commands.erase(name);
+}
+
 void CommandEndpoint::registerBoolCmd(std::string name, std::string speakingName, std::string description, bool *boolean, bool defaultValue, bool writeable){
     *boolean=defaultValue;
     Callback_ptr callback(new BoolCallback(name, speakingName, description, boolean, writeable));

@@ -45,7 +45,7 @@ void FileEndpoint::receive(Command_ptr command){
 }
 
 void FileEndpoint::deliver_impl(NMEAmsg_ptr msg){
-    if(!playback){
+    if(recording && !playback){
         file_stream<<  to_simple_string(msg->getReceived()) << " " << msg->data(true);
         file_stream.flush();
     }
@@ -55,9 +55,11 @@ void FileEndpoint::record(){
     stopPlayback();
     file_stream.seekg(0, file_stream.end);
     playback=false;
+    recording=true;
 }
 
 void FileEndpoint::startPlayback(boost::posix_time::ptime from,  boost::posix_time::ptime to){
+    recording=false;
     playback=true;
     stopPlaybackNow=false;
     playbackThread = boost::thread(&FileEndpoint::play, this, from, to);
@@ -94,7 +96,7 @@ void FileEndpoint::play(boost::posix_time::ptime from,  boost::posix_time::ptime
             else if(msg_or_cmd.find('$')!=std::string::npos || msg_or_cmd.find('!')!=std::string::npos){
                 if(input){
                     try {
-                        NMEAmsg_ptr msg(new NMEAmsg(msg_or_cmd, this->shared_from_this()));
+                        NMEAmsg_ptr msg = NMEAmsg::factory(msg_or_cmd, this->shared_from_this());
                         receive(msg);
                     }
                     catch (const std::invalid_argument& ia) {
@@ -120,6 +122,7 @@ void FileEndpoint::deliverAnswer_impl(Answer_ptr answer){
 }
 
 FileEndpoint::FileEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo){
+    recording=false;
     playback=false;
     stopPlaybackNow=true;
 }

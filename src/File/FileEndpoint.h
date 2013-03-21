@@ -47,6 +47,7 @@ private:
     std::fstream file_stream;
     std::string filename;
     bool playback;
+    bool recording;
     bool stopPlaybackNow;
     boost::thread playbackThread;
 };

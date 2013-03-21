@@ -9,6 +9,8 @@
 #include "NMEAEndpoint.h"
 #include "NMEAMidpoint.h"
 #include <boost/bind.hpp>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <limits>
 
 NMEAEndpoint::NMEAEndpoint(boost::shared_ptr<Endpoint> connectedTo): CommandEndpoint(connectedTo){}
@@ -95,11 +97,23 @@ bool NMEAEndpoint::compress(NMEAmsg_ptr msg, std::map<std::string,std::pair<std:
 }
 
 bool NMEAEndpoint::black_and_white(NMEAmsg_ptr msg, const std::vector<std::string> *blacklist, const std::vector<std::string> *whitelist){
-    if(std::find(whitelist->begin(), whitelist->end(), msg->getId()) != whitelist->end()){
-        return true;
+    for(std::vector<std::string>::const_iterator stringId = whitelist->begin(); stringId != whitelist->end();++stringId){
+        std::string stringId_cpy(*stringId);
+        boost::replace_all(stringId_cpy, "*", "(.*)");
+        boost::regex reg("^"+stringId_cpy+"$");
+        boost::cmatch matches;
+        if(boost::regex_search(msg->getId().c_str(), matches, reg)){
+            return true;
+        }
     }
-    else if(std::find(blacklist->begin(), blacklist->end(), msg->getId()) != blacklist->end()){
-        return false;
+    for(std::vector<std::string>::const_iterator stringId = blacklist->begin(); stringId != blacklist->end();++stringId){
+        std::string stringId_cpy(*stringId);
+        boost::replace_all(stringId_cpy, "*", "(.*)");
+        boost::regex reg("^"+stringId_cpy+"$");
+        boost::cmatch matches;
+        if(boost::regex_search(msg->getId().c_str(), matches, reg)){
+            return false;
+        }
     }
     return true;
 }

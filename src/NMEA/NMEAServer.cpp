@@ -12,6 +12,7 @@
 
 #include "../TCP/TCPServer.h"
 #include "../File/FileEndpoint.h"
+#include "../NMEA/GPSEndpoint.h"
 
 NMEAServer_ptr NMEAServer::getInstance() {
     static NMEAServer_ptr theInstance(new NMEAServer());
@@ -134,6 +135,10 @@ void NMEAServer::receiveCommand(Command_ptr command){
                     {
                         std::cerr << "TCP Exception: " << e.what() << "\n";
                     }
+                }
+                if(type=="GPSreceiver"){
+                    GPSEndpoint::factory(this->shared_from_this());
+                    command->answer("New GPSEndpoint successfully created\n", this->shared_from_this());
                 }
             }
             else{

@@ -103,7 +103,7 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
                 else if(data.find('$')!=std::string::npos || data.find('!')!=std::string::npos){
                     if(input){
                         try {
-                            NMEAmsg_ptr msg(new NMEAmsg(tmpString, this->shared_from_this()));
+                            NMEAmsg_ptr msg = NMEAmsg::factory(tmpString, this->shared_from_this());
                             receive(msg);
                         }
                         catch (const std::invalid_argument& ia) {

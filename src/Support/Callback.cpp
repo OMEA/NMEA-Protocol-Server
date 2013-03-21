@@ -198,6 +198,7 @@ void StringVectorCallback::execute(Command_ptr command, CommandEndpoint_ptr inst
             std::stringstream iss(ids);
             std::string id;
             while(std::getline(iss, id, ',')) {
+                trim(id);
                 if(id.length()>0 && std::find(vector->begin(), vector->end(), id) == vector->end()){
                     vector->push_back(id);
                 }
@@ -231,6 +232,7 @@ void StringVectorCallback::execute(Command_ptr command, CommandEndpoint_ptr inst
             std::stringstream iss(ids);
             std::string id;
             while(std::getline(iss, id, ',')) {
+                trim(id);
                 if(id.length()>0 && std::find(vector->begin(), vector->end(), id) == vector->end()){
                     vector->push_back(id);
                 }
@@ -263,6 +265,7 @@ void StringVectorCallback::execute(Command_ptr command, CommandEndpoint_ptr inst
             std::stringstream iss(ids);
             std::string id;
             while(std::getline(iss, id, ',')) {
+                trim(id);
                 if(id.length()>0){
                     std::vector<std::string>::iterator it = std::find(vector->begin(), vector->end(), id);
                     if(it != vector->end()){

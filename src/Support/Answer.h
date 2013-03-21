@@ -34,7 +34,7 @@ public:
     
     const std::string to_str() const;
     
-    private:
+private:
     boost::shared_ptr<Command> origin_cmd;
     std::string message;
     Type type;

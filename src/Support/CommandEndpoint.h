@@ -33,6 +33,7 @@ private:
     void id_cmd(Command_ptr command);
     
 protected:
+    void unregisterCmd(std::string name);
     void registerBoolCmd(std::string name, std::string speakingName, std::string description, bool *boolean, bool defaultValue, bool writeable=true);
     void registerUIntCmd(std::string name, std::string speakingName, std::string description, unsigned int *uint, unsigned int defaultValue, unsigned int min=0, unsigned int max=UINT_MAX, bool writeable=true);
     void registerIntCmd(std::string name, std::string speakingName, std::string description, int *int_, int defaultValue, int min, int max, bool writeable);

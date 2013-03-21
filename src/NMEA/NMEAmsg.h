@@ -21,8 +21,11 @@ typedef boost::shared_ptr<NMEAEndpoint> NMEAEndpoint_ptr;
 
 class NMEAmsg: public Message {
 public:
+    static boost::shared_ptr<NMEAmsg> factory(std::string parseMsg, Endpoint_ptr sender);
+protected:
     NMEAmsg();
     NMEAmsg(std::string parseMsg, Endpoint_ptr sender);
+public:
     virtual ~NMEAmsg(){}
     
     void setStart(char start){this->start = start;}
