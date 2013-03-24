@@ -50,7 +50,7 @@ INCLUDE_DIRECTORIES("${MAINFOLDER}/include")
 # Locate Project Prerequisites 
 #
 SET (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" "1.50" "1.50.0")
-FIND_PACKAGE (Boost 1.37 COMPONENTS "system" "thread" "date_time" "regex" REQUIRED)
+FIND_PACKAGE (Boost 1.37 COMPONENTS "system" "thread" "date_time" "regex" "program_options" REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
