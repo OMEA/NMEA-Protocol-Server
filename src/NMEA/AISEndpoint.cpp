@@ -18,21 +18,8 @@ boost::shared_ptr<AISEndpoint> AISEndpoint::factory(boost::shared_ptr<Endpoint> 
 
 AISEndpoint::AISEndpoint(boost::shared_ptr<Endpoint> connectedTo): GPSEndpoint(connectedTo){
     std::string lala = "177KQJ5000G?tO`K>RA1wUbN0TKH";
-    std::string lala2 = AISmsg::armoring(AISmsg::deArmoring(lala));
     std::string dede = ais_decode(lala);
     std::cout << lala << "->" << dede << std::endl;
-    if(lala==lala2)
-        std::cout << "SAME RESULT" <<std::endl;
-    else
-        std::cout << "DIFFERENT RESULT" <<std::endl;
-    std::cout << lala << std::endl << lala2 << std::endl;
-    const unsigned char muh=dede[0];
-    std::cout << ((unsigned int)muh) << std::endl;
-    //std::stringstream oss;
-    //std::string s2 = AISmsg::deArmoring("1771");
-    //std::string s3 = AISmsg::armoring(s2);
-    //std::cout << s2.length() << ","<< s3.length()<< std::endl;
-    //std::cout << ((unsigned int)s3[0]) << std::endl;
 }
 
 std::string AISEndpoint::ais_decode(std::string bitstream){

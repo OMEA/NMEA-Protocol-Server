@@ -72,10 +72,9 @@ int64_t sbits(const char buf[], unsigned int start, unsigned int width, bool le)
 
 std::string AISmsg::deArmoring(const std::string deArmoring){
     std::ostringstream oss;
-    unsigned char byte=0;
     unsigned int destPos = 0;
+    unsigned char byte=0;
     for(unsigned int i=0;i<deArmoring.length();++i){
-        int shift = (2-destPos);
         unsigned char corrected = deArmoring[i];
         corrected-=48;
         if(corrected>40){
@@ -84,66 +83,66 @@ std::string AISmsg::deArmoring(const std::string deArmoring){
         if(corrected&0xC0){
             std::cerr << "ERROR wrong coding of AIS"<<std::endl;
         }
-        if(shift>=0){
-            byte |= ((corrected&0x3F)<<shift);
+        switch(destPos){
+            case 0: break;
+            case 6: byte |= ((corrected&0x3F)>>4); break;
+            case 4: byte |= ((corrected&0x3F)>>2); break;
+            case 2: byte |= ((corrected&0x3F)>>0); break;
+            default:
+                std::cerr << "ERROR THIS SHOULD NEVER HAPPEN!"<<std::endl;
         }
-        else{
-            byte |= ((corrected&0x3F)>>abs(shift));
+        if(destPos!=0){
+            oss << byte;
+        }
+        switch(destPos){
+            case 0: byte = ((corrected&0x3F)<<2); break;
+            case 6: byte = ((corrected&0x3F)<<4); break;
+            case 4: byte = ((corrected&0x3F)<<6); break;
+            case 2: break;
+            default:
+                std::cerr << "ERROR THIS SHOULD NEVER HAPPEN!"<<std::endl;
         }
         destPos+=6;
-        
-        if(destPos>=8){
-            destPos-=8;
-            oss << byte;
-            if(destPos!=0){
-                byte = ((corrected&0x3F)<<(8-destPos));
-            }
-        }
+        destPos%=8;
     }
-
-    
     return oss.str();
 }
 
 std::string AISmsg::armoring(const std::string armoringStr){
     std::ostringstream oss;
     unsigned char byte=0;
-    unsigned int srcPos = 2;
-    bool notStart = false;
+    unsigned int srcPos = 0;
     for(int i=0;i<(int)armoringStr.length();){
-        //if(srcPos!=2){
-        unsigned char origin = armoringStr[i];
-        if(notStart){
-            byte = (origin<<(8-srcPos))&0x3F;
+        unsigned char source = armoringStr[i];
+        switch(srcPos){
+            case 0: byte |= ((source>>2)&0x3F); break;
+            case 6: byte |= ((source>>4)&0x0F); break;
+            case 4: byte |= ((source>>6)&0x03); break;
+            case 2: byte |= ((source>>8)&0x00); break;
+            default:
+                std::cerr << "ERROR THIS SHOULD NEVER HAPPEN!"<<std::endl;
         }
-        notStart=true;
-        //}
-        //else{
-        //    byte = 0;
-        //}
-        if(srcPos!=6){
-            i++;
-        }
-        //if(srcPos!=8){
-            byte |= (origin>>srcPos)&0x3F;
-        //std::cout << "i=" << i << "pos=" << srcPos << "byte=" << (unsigned int)byte << "stringbyte=" << (unsigned int)origin <<std::endl;
-        //}
         if(byte&0xC0){
-            std::cerr << "ERROR wrong coding of AIS has bit1 or bit2 set!"<<std::endl;
+            std::cerr << "ERROR THIS SHOULD NEVER HAPPEN!"<<std::endl;
         }
         if(byte>=40){
             byte+=8;
         }
         byte+=48;
         oss << byte;
-        srcPos+=2;
-        if(srcPos>8)
-            srcPos-=8;
-        
+        switch(srcPos){
+            case 0: byte = ((source<<4)&0x30); ++i; break;
+            case 6: byte = ((source<<2)&0x3C); ++i; break;
+            case 4: byte = ((source<<0)&0x3F); break;
+            case 2: byte = ((source<<8)&0x00); ++i; break;
+            default:
+                std::cerr << "ERROR THIS SHOULD NEVER HAPPEN!"<<std::endl;
+        }
+        srcPos+=6;
+        srcPos%=8;
     }
     return oss.str();
 }
-
 
 boost::shared_ptr<AISmsg> AISmsg::factory(std::string parseMsg) {
     boost::shared_ptr<AISmsg> ret;

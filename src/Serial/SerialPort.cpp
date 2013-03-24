@@ -10,6 +10,8 @@
 #include "../NMEA/NMEAServer.h"
 
 boost::shared_ptr<SerialPort> SerialPort::factory(boost::shared_ptr<Endpoint> connectedTo, std::string devName){
+    //IOService in endpoint und beim beenden stop() aufrufen
+    
     SerialPort_ptr sp = boost::shared_ptr<SerialPort>(new SerialPort(connectedTo, devName,9600));
     sp->initialize();
     return sp;
@@ -22,14 +24,15 @@ SerialPort::SerialPort(boost::shared_ptr<Endpoint> connectedTo, const std::strin
                        asio::serial_port_base::stop_bits opt_stop):AsyncEndpoint<asio::serial_port>(connectedTo), io(), port(io), openFlag(false),
 error(false){
     
-    open(devname,baud_rate,opt_parity,opt_csize,opt_flow,opt_stop);
     setSessionId(devname);
     setAOStream(&port);
+    open(devname,baud_rate,opt_parity,opt_csize,opt_flow,opt_stop);
 }
 
 void SerialPort::initialize(){
     AsyncEndpoint<asio::serial_port>::initialize();
     start();
+    io.run();
 }
 
 SerialPort::~SerialPort()
@@ -46,7 +49,7 @@ SerialPort::~SerialPort()
 }
 
 std::string SerialPort::getId(){
-    return devname;
+    return "Serial://"+devname;
 }
 
 void SerialPort::open(const std::string& devname, unsigned int baud_rate,
