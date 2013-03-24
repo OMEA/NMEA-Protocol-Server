@@ -11,6 +11,9 @@
 #include "AISmsg.h"
 #include "PositionReportmsg.h"
 
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
 uint64_t ubits(const char buf[], unsigned int start, unsigned int width, bool le)
 /* extract a (zero-origin) bitfield from the buffer as an unsigned big-endian uint64_t */
 {
