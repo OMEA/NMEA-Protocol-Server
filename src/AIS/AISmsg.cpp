@@ -107,7 +107,7 @@ std::string AISmsg::armoring(const std::string armoringStr){
     unsigned char byte=0;
     unsigned int srcPos = 2;
     bool notStart = false;
-    for(int i=0;i<armoringStr.length();){
+    for(int i=0;i<(int)armoringStr.length();){
         //if(srcPos!=2){
         unsigned char origin = armoringStr[i];
         if(notStart){

@@ -83,7 +83,7 @@ bool NMEAEndpoint::compress(NMEAmsg_ptr msg, std::map<std::string,std::pair<std:
         std::pair<std::size_t, unsigned int> entry = (*(hashes->find(msg->getId()))).second;
         std::size_t msghash= entry.first;
         unsigned int prev_messages = entry.second;
-        if(msghash == hash && (prev_messages < num_messages || num_messages==-1)){
+        if(msghash == hash && (num_messages<0 || prev_messages < (unsigned int)num_messages)){
             prev_messages++;
             hashes->erase(msg->getId());
             hashes->insert(std::pair<std::string, std::pair<std::size_t, unsigned int> >(msg->getId(),std::pair<std::size_t, unsigned int>(msghash, prev_messages)));

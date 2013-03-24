@@ -25,7 +25,7 @@ typedef boost::shared_ptr<NMEAServer> NMEAServer_ptr;
 class NMEAServer: public NMEAMidpoint, public boost::enable_shared_from_this<NMEAServer>
 {
 public:
-    using NMEAEndpoint::deliver;
+    //using NMEAEndpoint::deliver;
     using NMEAMidpoint::deliver;
 private:
     std::list<Message_ptr> msgs;
