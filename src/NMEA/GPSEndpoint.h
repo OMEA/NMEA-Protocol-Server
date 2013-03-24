@@ -17,7 +17,7 @@
 
 class GPSEndpoint: public NMEAEndpoint, public boost::enable_shared_from_this<GPSEndpoint>{
 public:
-    static boost::shared_ptr<GPSEndpoint> factory(boost::shared_ptr<Endpoint> connectedTo, std::string filename=std::string(""));
+    static boost::shared_ptr<GPSEndpoint> factory(boost::shared_ptr<Endpoint> connectedTo);
 protected:
     GPSEndpoint(boost::shared_ptr<Endpoint> connectedTo);
     virtual void initialize();

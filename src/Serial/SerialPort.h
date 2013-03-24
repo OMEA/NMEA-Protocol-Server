@@ -17,6 +17,8 @@ using namespace boost;
 
 class SerialPort : public AsyncEndpoint<asio::serial_port>{
 public:
+    static boost::shared_ptr<SerialPort> factory(boost::shared_ptr<Endpoint> connectedTo, std::string devName);
+public:
     SerialPort();
     /**
      * Constructor. Creates and opens a serial device.
@@ -29,7 +31,7 @@ public:
      * \throws boost::system::system_error if cannot open the
      * serial device
      */
-    SerialPort(const std::string& devname, unsigned int baud_rate,
+    SerialPort(boost::shared_ptr<Endpoint> connectedTo, const std::string& devname, unsigned int baud_rate,
                asio::serial_port_base::parity opt_parity=
                     asio::serial_port_base::parity(asio::serial_port_base::parity::none),
                asio::serial_port_base::character_size opt_csize=
@@ -76,7 +78,8 @@ public:
     bool errorStatus() const;
     
     std::string getId();
-    
+protected:
+    virtual void initialize();
 private:
     /**
      * Read buffer maximum size
@@ -103,5 +106,7 @@ private:
     void setErrorStatus(bool e);
     
 };
+
+typedef boost::shared_ptr<SerialPort> SerialPort_ptr;
 
 #endif /* defined(__NMEA_Protocol_Server__SerialPort__) */

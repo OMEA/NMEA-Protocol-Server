@@ -9,17 +9,27 @@
 #include "SerialPort.h"
 #include "../NMEA/NMEAServer.h"
 
-SerialPort::SerialPort(): io(), port(io), openFlag(false), error(false){}
+boost::shared_ptr<SerialPort> SerialPort::factory(boost::shared_ptr<Endpoint> connectedTo, std::string devName){
+    SerialPort_ptr sp = boost::shared_ptr<SerialPort>(new SerialPort(connectedTo, devName,9600));
+    sp->initialize();
+    return sp;
+}
 
-SerialPort::SerialPort(const std::string& devname,unsigned int baud_rate,
+SerialPort::SerialPort(boost::shared_ptr<Endpoint> connectedTo, const std::string& devname,unsigned int baud_rate,
                        asio::serial_port_base::parity opt_parity,
                        asio::serial_port_base::character_size opt_csize,
                        asio::serial_port_base::flow_control opt_flow,
-                       asio::serial_port_base::stop_bits opt_stop): io(), port(io), openFlag(false),
+                       asio::serial_port_base::stop_bits opt_stop):AsyncEndpoint<asio::serial_port>(connectedTo), io(), port(io), openFlag(false),
 error(false){
     
     open(devname,baud_rate,opt_parity,opt_csize,opt_flow,opt_stop);
     setSessionId(devname);
+    setAOStream(&port);
+}
+
+void SerialPort::initialize(){
+    AsyncEndpoint<asio::serial_port>::initialize();
+    start();
 }
 
 SerialPort::~SerialPort()
@@ -58,7 +68,6 @@ void SerialPort::open(const std::string& devname, unsigned int baud_rate,
     
     setErrorStatus(false);//If we get here, no error
     openFlag=true; //Port is now open
-    //NMEAServer::getInstance()->addEndpoint(shared_from_this());
 }
 
 void SerialPort::close()

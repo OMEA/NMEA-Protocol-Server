@@ -10,7 +10,7 @@
 #include "GPSEndpoint.h"
 #include "Messages/RMCmsg.h"
 
-boost::shared_ptr<GPSEndpoint> GPSEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo, std::string filename) {
+boost::shared_ptr<GPSEndpoint> GPSEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo) {
     GPSEndpoint_ptr gpsEndpoint(new GPSEndpoint(connectedTo));
     gpsEndpoint->initialize();
     return gpsEndpoint;
