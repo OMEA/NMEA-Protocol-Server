@@ -60,6 +60,17 @@ std::string AISEndpoint::ais_decode(std::string bitstream){
     if(stat){
         oss << "callsign:" << stat->getCallsign() << std::endl;
         oss << "shipname:" << stat->getShipname() << std::endl;
+        oss << "shiptype:" << stat->getShiptype() << std::endl;
+        oss << "toBow:" << stat->getToBow() << std::endl;
+        oss << "toStern:" << stat->getToStern() << std::endl;
+        oss << "toPort:" << (unsigned int)stat->getToPort() << std::endl;
+        oss << "toStarboard:" << (unsigned int)stat->getToStarboard() << std::endl;
+        oss << "draught:" << (float)stat->getDraught()/10 << std::endl;
+        oss << "epfd:" << (unsigned int)stat->getEPFD() << std::endl;
+        oss << "ETA:" << (unsigned int)stat->getDay() << "." << (unsigned int)stat->getMonth() << " " << (unsigned int)stat->getHour() << ":" << (unsigned int)stat->getMinute() << std::endl;
+        oss << "destination:" << stat->getDestination() << std::endl;
+        oss << "dte:" << (unsigned int)stat->getDTE() << std::endl;
+        
     }
     
     return oss.str();
