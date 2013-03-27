@@ -59,6 +59,8 @@ void AIVDOEndpoint::sendPositionReportClassA(){
     pr->setManeuver(AISmsg::NOT_AVAILABLE);
     pr->setRaim(false);
     pr->setRadio(0);
+    
+    std::cout << pr->toCodedStr() << std::endl;
 }
 
 void AIVDOEndpoint::deliver_impl(NMEAmsg_ptr msg){

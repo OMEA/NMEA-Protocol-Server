@@ -15,6 +15,7 @@
 #include "../Serial/SerialPort.h"
 #include "../NMEA/GPSEndpoint.h"
 #include "../NMEA/AISEndpoint.h"
+#include "../NMEA/AIVDOEndpoint.h"
 
 NMEAServer_ptr NMEAServer::getInstance() {
     static NMEAServer_ptr theInstance(new NMEAServer());
@@ -149,6 +150,10 @@ void NMEAServer::receiveCommand(Command_ptr command){
                 else if(type=="AISreceiver"){
                     AISEndpoint::factory(this->shared_from_this());
                     command->answer("New AISEndpoint successfully created\n", this->shared_from_this());
+                }
+                else if(type=="virtualAIVDO"){
+                    AIVDOEndpoint::factory(this->shared_from_this());
+                    command->answer("New virtualAIVDO successfully created\n", this->shared_from_this());
                 }
             }
             else{
