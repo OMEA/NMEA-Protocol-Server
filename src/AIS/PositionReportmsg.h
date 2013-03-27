@@ -15,9 +15,9 @@
 class PositionReportmsg: public AISmsg{
 public:
     static boost::shared_ptr<PositionReportmsg> factory(std::string parseMsg);
+    PositionReportmsg();
 protected:
     PositionReportmsg(std::string parseMsg);
-    PositionReportmsg();
     virtual void code(std::string &code);
 public:
     virtual ~PositionReportmsg(){}
@@ -40,6 +40,23 @@ public:
     void setLat(int lat){this->lat=lat;}
     int getLat(){return lat;}
     
+    void setCourse(unsigned int course){this->course=course;}
+    unsigned int getCourse(){return course;}
+    
+    void setHeading(unsigned int heading){this->heading=heading;}
+    unsigned int getHeading(){return heading;}
+    
+    void setTimestamp(unsigned char timestamp){this->timestamp=timestamp;}
+    unsigned char getTimestamp(){return timestamp;}
+    
+    void setManeuver(AISmsg::ManeuverIndicator maneuver){this->maneuver=maneuver;}
+    AISmsg::ManeuverIndicator getManeuver(){return maneuver;}
+    
+    void setRaim(bool raim){this->raim=raim;}
+    bool getRaim(){return raim;}
+    
+    void setRadio(unsigned int radio){this->radio=radio;}
+    unsigned int getRadio(){return radio;}
 private:
     AISmsg::NavigationStatus status;
     char rot;

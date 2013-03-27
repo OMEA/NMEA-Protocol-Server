@@ -15,9 +15,9 @@
 class StaticVoyageRelatedmsg: public AISmsg{
 public:
     static boost::shared_ptr<StaticVoyageRelatedmsg> factory(std::string parseMsg);
+    StaticVoyageRelatedmsg();
 protected:
     StaticVoyageRelatedmsg(std::string parseMsg);
-    StaticVoyageRelatedmsg();
     virtual void code(std::string &code);
 public:
     virtual ~StaticVoyageRelatedmsg(){}

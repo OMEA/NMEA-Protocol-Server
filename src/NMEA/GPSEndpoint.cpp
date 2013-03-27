@@ -29,10 +29,10 @@ void GPSEndpoint::initialize(){
     unregisterCmd("outcompress");
     unregisterCmd("out_black");
     unregisterCmd("out_white");
-    registerEndpoint();
     boost::function<void (Command_ptr)> func = boost::bind(&GPSEndpoint::list_cmd, this, _1);
     registerVoidCmd("list","List of Properties", "List of all properties of the GPS receiver.",  func);
     receivedData=false;
+    registerEndpoint();
 }
 
 void GPSEndpoint::list_cmd(Command_ptr command){

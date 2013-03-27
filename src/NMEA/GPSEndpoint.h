@@ -30,6 +30,24 @@ protected:
     
 private:
     void list_cmd(Command_ptr command);
+public:
+    void setTime(boost::posix_time::ptime time){this->time=time;}
+    boost::posix_time::ptime getTime(){return time;}
+    
+    void setState(State state){this->state=state;}
+    State getState(){return state;}
+    
+    void setLatitude(Latitude latitude){this->latitude=latitude;}
+    Latitude getLatitude(){return latitude;}
+    
+    void setLongitude(Longitude longitude){this->longitude=longitude;}
+    Longitude getLongitude(){return longitude;}
+    
+    void setSpeed(double speed){this->speed=speed;}
+    double getSpeed(){return speed;}
+    
+    void setCourse(double course){this->course=course;}
+    double getCourse(){return course;}
 private:
     bool receivedData;
     boost::posix_time::ptime time;

@@ -8,6 +8,7 @@
 
 #include "NMEAmsg.h"
 #include "Messages/RMCmsg.h"
+#include "Messages/AIVDmsg.h"
 
 #include <boost/regex.hpp>
 #include <string>
@@ -17,6 +18,9 @@ boost::shared_ptr<NMEAmsg> NMEAmsg::factory(std::string parseMsg, Endpoint_ptr s
     std::string id=parseMsg.substr(1, parseMsg.find_first_of(',',2)-1);
     if(id=="GPRMC"){
         newMsg = boost::shared_ptr<RMCmsg>(new RMCmsg(parseMsg, sender));
+    }
+    else if(id=="AIVDO" || id=="AIVDM"){
+        newMsg = boost::shared_ptr<AIVDmsg>(new AIVDmsg(parseMsg, sender));
     }
     else{
         newMsg = boost::shared_ptr<NMEAmsg>(new NMEAmsg(parseMsg, sender));

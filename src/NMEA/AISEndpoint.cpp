@@ -8,6 +8,7 @@
 
 #include "AISEndpoint.h"
 #include "../NMEA/Messages/navobjects.h"
+#include "../NMEA/Messages/AIVDmsg.h"
 #include "../AIS/AISmsg.h"
 #include "../AIS/PositionReportmsg.h"
 #include "../AIS/StaticVoyageRelatedmsg.h"
@@ -19,13 +20,28 @@ boost::shared_ptr<AISEndpoint> AISEndpoint::factory(boost::shared_ptr<Endpoint> 
 }
 
 
-AISEndpoint::AISEndpoint(boost::shared_ptr<Endpoint> connectedTo): GPSEndpoint(connectedTo){
+AISEndpoint::AISEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo){
     std::string lala = "177KQJ5000G?tO`K>RA1wUbN0TKH";
     lala = "139OpT5P?wdtSF0l4Q@>4?wp2@CR";
     lala = "176qwD00000eUfrNVNn=EP`P0896";
     lala = "537aeL02>mUP?ADc800TADp4000000000000001601s0F4a>N@j0C@UDQh0000000000000";
     std::string dede = ais_decode(lala);
     std::cout << lala << "->" << dede << std::endl;
+}
+
+void AISEndpoint::initialize(){
+    NMEAEndpoint::initialize();
+    unregisterCmd("output");
+    unregisterCmd("mirror");
+    unregisterCmd("checksum");
+    unregisterCmd("incompress");
+    registerIntCmd("incompress","Input Compressor Number", "Defines the maximum number of consecutive incoming messages that are compressed. 0 = no compresson; -1 = infinite compression", &incompress_messages, -1, -1, std::numeric_limits<int>::max(), false);
+    unregisterCmd("outcompress");
+    unregisterCmd("out_black");
+    unregisterCmd("out_white");
+    //boost::function<void (Command_ptr)> func = boost::bind(&GPSEndpoint::list_cmd, this, _1);
+    //registerVoidCmd("list","List of Properties", "List of all properties of the GPS receiver.",  func);
+    registerEndpoint();
 }
 
 std::string AISEndpoint::ais_decode(std::string bitstream){
@@ -74,4 +90,10 @@ std::string AISEndpoint::ais_decode(std::string bitstream){
     }
     
     return oss.str();
+}
+
+void AISEndpoint::deliver_impl(NMEAmsg_ptr msg){
+    if(AIVDmsg_ptr aivd = boost::dynamic_pointer_cast<AIVDmsg>(msg)){
+        std::cout << "AIS-MESSAGE" << std::endl;
+    }
 }
