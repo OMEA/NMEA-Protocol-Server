@@ -47,7 +47,7 @@ TCPSession::TCPSession(boost::asio::io_service& io_service, unsigned int port): 
         result = setsockopt(native_sock, SOL_SOCKET, TCP_KEEPIDLE, &idle, sizeof(idle));
         int interval = 1;
         result = setsockopt(native_sock, SOL_SOCKET, TCP_KEEPINTVL, &interval, sizeof(interval));
-        int count = 10
+        int count = 10;
         result = setsockopt(native_sock, SOL_SOCKET, TCP_KEEPCNT, &count, sizeof(count));
         std::cout << "changed keepalive "<<result<<std::endl;
     }
