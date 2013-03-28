@@ -51,6 +51,9 @@ TCPSession::TCPSession(boost::asio::io_service& io_service, unsigned int port): 
         result = setsockopt(native_sock, SOL_SOCKET, TCP_KEEPCNT, &count, sizeof(count));
         std::cout << "changed keepalive "<<result<<std::endl;
     }
+    else{
+        std::cout << "invalid socket!"<<std::endl;
+    }
 #endif
     setAOStream(&socket_);
 }
