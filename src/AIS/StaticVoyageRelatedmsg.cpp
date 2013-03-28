@@ -13,7 +13,7 @@ boost::shared_ptr<StaticVoyageRelatedmsg> StaticVoyageRelatedmsg::factory(std::s
     return ret;
 }
 
-StaticVoyageRelatedmsg::StaticVoyageRelatedmsg(): AISmsg(){
+StaticVoyageRelatedmsg::StaticVoyageRelatedmsg(unsigned int mmsi): AISmsg(mmsi){
     setBitLength(424);
     ais_version = 0;
     imo = 0;

@@ -23,7 +23,7 @@ class NMEAmsg: public Message {
 public:
     static boost::shared_ptr<NMEAmsg> factory(std::string parseMsg, Endpoint_ptr sender);
 protected:
-    NMEAmsg();
+    NMEAmsg(Endpoint_ptr sender, char start, std::string id);
     NMEAmsg(std::string parseMsg, Endpoint_ptr sender);
 public:
     virtual ~NMEAmsg(){}
@@ -32,8 +32,8 @@ public:
     const char getStart()const{return this->start;}
     void setId(char id){this->id = id;}
     const std::string getId()const{return this->id;}
-    void setMsg(std::string msg);
-    const std::string getMsg()const{return this->msg;}
+    virtual void setMsg(std::string msg);
+    virtual const std::string getMsg()const{return this->msg;}
     
     virtual const std::string to_str() const;
         

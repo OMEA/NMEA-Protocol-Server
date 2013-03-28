@@ -107,7 +107,7 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
                             receive(msg);
                         }
                         catch (const std::invalid_argument& ia) {
-                            std::cerr << "Received a message that might not be conform with NMEA-0183 message format: " << tmpString << std::endl;
+                            std::cerr << "Received a message that might not be conform with NMEA-0183 message format: " << tmpString << " (" << ia.what() << ")" << std::endl;
                         }
                     }
                 }

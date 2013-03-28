@@ -13,8 +13,9 @@ boost::shared_ptr<PositionReportmsg> PositionReportmsg::factory(std::string pars
     return ret;
 }
 
-PositionReportmsg::PositionReportmsg(): AISmsg(){
+PositionReportmsg::PositionReportmsg(unsigned int mmsi): AISmsg(mmsi){
     setBitLength(168);
+    setType(AISmsg::POSITION_REPORT_CLASS_A);
     status = AISmsg::NOT_DEFINED;
     rot = 0x80;
     sog = 1023;

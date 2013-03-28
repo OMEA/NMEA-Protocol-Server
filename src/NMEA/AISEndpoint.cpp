@@ -45,7 +45,6 @@ void AISEndpoint::initialize(){
 }
 
 std::string AISEndpoint::ais_decode(std::string bitstream){
-    //const char sixchr[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^- !\"#$%&'()*+,-./0123456789:;<=>?";
     std::ostringstream oss;
     
     AISmsg_ptr msg = AISmsg::factory(bitstream);
@@ -60,6 +59,7 @@ std::string AISEndpoint::ais_decode(std::string bitstream){
     
     PositionReportmsg_ptr rep = boost::dynamic_pointer_cast<PositionReportmsg>(msg);
     if(rep){
+        oss << "speed:" << (double)rep->getSog()/10 << std::endl;
         if(rep->getLon()!=0x6791AC0){
             oss << "lon:" << Longitude((double)rep->getLon()/10000).to_str() << std::endl;
         }else{
@@ -70,7 +70,12 @@ std::string AISEndpoint::ais_decode(std::string bitstream){
         }else{
             oss << "lat: INVALID" << std::endl;
         }
-        
+        oss << "course:" << (double)rep->getCourse()/10 << std::endl;
+        oss << "heading:" << rep->getHeading() << std::endl;
+        oss << "second:" << (unsigned int)rep->getTimestamp() << std::endl;
+        oss << "maneuver:" << rep->getManeuver() << std::endl;
+        oss << "raim:" << rep->getRaim() << std::endl;
+        oss << "radio:" << rep->getRadio() << std::endl;
     }
     StaticVoyageRelatedmsg_ptr stat = boost::dynamic_pointer_cast<StaticVoyageRelatedmsg>(msg);
     if(stat){
@@ -95,5 +100,6 @@ std::string AISEndpoint::ais_decode(std::string bitstream){
 void AISEndpoint::deliver_impl(NMEAmsg_ptr msg){
     if(AIVDmsg_ptr aivd = boost::dynamic_pointer_cast<AIVDmsg>(msg)){
         std::cout << "AIS-MESSAGE" << std::endl;
+        std::cout << ais_decode(aivd->getPayload()) << std::endl;
     }
 }

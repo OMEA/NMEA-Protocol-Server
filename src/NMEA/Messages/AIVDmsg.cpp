@@ -24,9 +24,13 @@ std::string payload;
 unsigned char fillBits;
 
 AIVDmsg::AIVDmsg(std::string parseMsg, Endpoint_ptr sender): NMEAmsg(parseMsg, sender){
-    boost::regex reg("^(\\d*),(\\d*),(\\d*),([AB]),([^,]*),\\d$");
+    setMsg(NMEAmsg::getMsg());
+}
+
+void AIVDmsg::setMsg(std::string msg){
+    boost::regex reg("^(\\d+),(\\d+),(\\d*),([AB]),([^,]*),(\\d)$");
     boost::cmatch matches;
-    if(boost::regex_search(this->getMsg().c_str(), matches, reg)){
+    if(boost::regex_search(msg.c_str(), matches, reg)){
         try{
             fragmentCount = boost::lexical_cast<unsigned int>(matches[MATCH_FRAGMENT_COUNT]);
         }
@@ -55,6 +59,19 @@ AIVDmsg::AIVDmsg(std::string parseMsg, Endpoint_ptr sender): NMEAmsg(parseMsg, s
         }
     }
     else{
-        throw std::invalid_argument("Cannot parse RMC message!");
+        throw std::invalid_argument("Cannot parse AIVD* message!");
     }
+}
+const std::string AIVDmsg::getMsg()const{
+    std::ostringstream oss;
+    std::string messageId = "";
+    if(this->messageId>0){
+        messageId= boost::lexical_cast<std::string>(this->messageId);
+    }
+    oss << this->fragmentCount << "," << this->fragment << "," << messageId << "," << this->channelCode << "," << this->payload  << "," << (unsigned int)this->fillBits;
+    return oss.str();
+}
+
+AIVDmsg::AIVDmsg(Endpoint_ptr sender, bool own): NMEAmsg(sender,'!', (own)?"AIVDO":"AIVDM"){
+    
 }

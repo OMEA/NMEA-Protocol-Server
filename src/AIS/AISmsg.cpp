@@ -222,11 +222,11 @@ boost::shared_ptr<AISmsg> AISmsg::factory(std::string parseMsg) {
     return ret;
 }
 
-AISmsg::AISmsg(){
+AISmsg::AISmsg(unsigned int mmsi){
     setBitLength(38);
     type = AISmsg::UNDEFINED;
     repeat = 0;
-    mmsi = 0L;
+    this->mmsi = mmsi;
 }
 
 AISmsg::AISmsg(std::string parseMsg){

@@ -15,7 +15,7 @@
 class PositionReportmsg: public AISmsg{
 public:
     static boost::shared_ptr<PositionReportmsg> factory(std::string parseMsg);
-    PositionReportmsg();
+    PositionReportmsg(unsigned int mmsi);
 protected:
     PositionReportmsg(std::string parseMsg);
     virtual void code(std::string &code);

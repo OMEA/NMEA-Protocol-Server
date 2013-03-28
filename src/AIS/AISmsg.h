@@ -194,7 +194,7 @@ public:
     std::string toCodedStr();
 protected:
     AISmsg(std::string parseMsg);
-    AISmsg();
+    AISmsg(unsigned int mmsi);
     virtual void code(std::string &code);
 private:
     unsigned int bitLength;

@@ -11,8 +11,9 @@
 #include "Messages/RMCmsg.h"
 #include "../AIS/PositionReportmsg.h"
 
-boost::shared_ptr<AIVDOEndpoint> AIVDOEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo) {
+boost::shared_ptr<AIVDOEndpoint> AIVDOEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo, unsigned int mmsi) {
     AIVDOEndpoint_ptr aivdoEndpoint(new AIVDOEndpoint(connectedTo));
+    aivdoEndpoint->setMMSI(mmsi);
     aivdoEndpoint->initialize();
     return aivdoEndpoint;
 }
@@ -22,23 +23,22 @@ AIVDOEndpoint::AIVDOEndpoint(boost::shared_ptr<Endpoint> connectedTo): GPSEndpoi
 
 void AIVDOEndpoint::initialize(){
     GPSEndpoint::initialize();
-    unregisterCmd("output");
-    unregisterCmd("mirror");
-    unregisterCmd("checksum");
     unregisterCmd("incompress");
-    registerIntCmd("incompress","Input Compressor Number", "Defines the maximum number of consecutive incoming messages that are compressed. 0 = no compresson; -1 = infinite compression", &incompress_messages, -1, -1, std::numeric_limits<int>::max(), false);
-    unregisterCmd("outcompress");
-    unregisterCmd("out_black");
-    unregisterCmd("out_white");
+    registerIntCmd("incompress","Input Compressor Number", "Defines the maximum number of consecutive incoming messages that are compressed. 0 = no compresson; -1 = infinite compression", &incompress_messages, 0, -1, std::numeric_limits<int>::max(), false);
     //boost::function<void (Command_ptr)> func = boost::bind(&GPSEndpoint::list_cmd, this, _1);
     //registerVoidCmd("list","List of Properties", "List of all properties of the GPS receiver.",  func);
-    registerEndpoint();
+}
+
+std::string AIVDOEndpoint::getId(){
+    std::ostringstream oss;
+    oss << "virtualAIVDO:" << getMMSI();
+    return oss.str();
 }
 
 void AIVDOEndpoint::sendPositionReportClassA(){
-    PositionReportmsg_ptr pr = boost::shared_ptr<PositionReportmsg>(new PositionReportmsg());
-    pr->setStatus(AISmsg::NOT_DEFINED);
-    pr->setSog(((unsigned int)getSpeed()*10));
+    PositionReportmsg_ptr pr = boost::shared_ptr<PositionReportmsg>(new PositionReportmsg(getMMSI()));
+    pr->setStatus(AISmsg::MOORED);
+    pr->setSog((unsigned int)(getSpeed()*10));
     pr->setAccuracy(false);
     int lon = 0;
     lon += getLongitude().getDegrees()*600000;
@@ -53,6 +53,7 @@ void AIVDOEndpoint::sendPositionReportClassA(){
     if(getLatitude().getSign()==Latitude::SOUTH){
         lat*=-1;
     }
+    pr->setLat(lat);
     pr->setCourse(((unsigned int)getCourse()*10));
     pr->setHeading(511);
     pr->setTimestamp(getTime().time_of_day().seconds());
@@ -60,7 +61,15 @@ void AIVDOEndpoint::sendPositionReportClassA(){
     pr->setRaim(false);
     pr->setRadio(0);
     
-    std::cout << pr->toCodedStr() << std::endl;
+    AIVDmsg_ptr msg(new AIVDmsg(this->v_shared_from_this(), true));
+    msg->setFragmentCount(1);
+    msg->setFragment(1);
+    msg->setMessageId(0);
+    msg->setChannelCode('B');
+    std::string payload = pr->toCodedStr();
+    msg->setPayload(payload);
+    msg->setFillBits(pr->getBitLength()%6);
+    receive(msg);
 }
 
 void AIVDOEndpoint::deliver_impl(NMEAmsg_ptr msg){

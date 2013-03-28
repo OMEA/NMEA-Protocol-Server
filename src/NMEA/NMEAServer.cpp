@@ -152,8 +152,23 @@ void NMEAServer::receiveCommand(Command_ptr command){
                     command->answer("New AISEndpoint successfully created\n", this->shared_from_this());
                 }
                 else if(type=="virtualAIVDO"){
-                    AIVDOEndpoint::factory(this->shared_from_this());
-                    command->answer("New virtualAIVDO successfully created\n", this->shared_from_this());
+                    try
+                    {
+                        if(args.length()==9){
+                            unsigned int mmsi = lexical_cast<unsigned int>(args);
+                            AIVDOEndpoint::factory(this->shared_from_this(), mmsi);
+                            command->answer("New virtualAIVDO successfully created\n", this->shared_from_this());
+                            
+                        }
+                        else{
+                            command->answer(Answer::WRONG_ARGS,"Cannot create virtualAIVDO. MMSI Arguemnt must be 9 digits\n", this->shared_from_this());
+                        }
+                    }
+                    catch (std::exception& e)
+                    {
+                        std::cerr << "virtualAIVDO: " << e.what() << "\n";
+                        command->answer(Answer::WRONG_ARGS,"Cannot create virtualAIVDO. MMSI Arguemnt must be 9 digits\n", this->shared_from_this());
+                    }
                 }
             }
             else{

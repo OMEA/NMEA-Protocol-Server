@@ -14,9 +14,13 @@
 
 class AIVDOEndpoint: public GPSEndpoint{
 public:
-    static boost::shared_ptr<AIVDOEndpoint> factory(boost::shared_ptr<Endpoint> connectedTo);
+    static boost::shared_ptr<AIVDOEndpoint> factory(boost::shared_ptr<Endpoint> connectedTo, unsigned int mmsi);
 public:
-    std::string getId(){return "virtualAIVDO";}
+    std::string getId();
+    
+    void setMMSI(unsigned int mmsi){this->mmsi = mmsi;}
+    unsigned int getMMSI(){return mmsi;}
+    
 protected:
     AIVDOEndpoint(boost::shared_ptr<Endpoint> connectedTo);
     virtual void initialize();
@@ -25,6 +29,8 @@ protected:
     virtual void deliverAnswer_impl(Answer_ptr answer){};
 private:
     void sendPositionReportClassA();
+private:
+    unsigned int mmsi;
 };
 
 typedef boost::shared_ptr<AIVDOEndpoint> AIVDOEndpoint_ptr;
