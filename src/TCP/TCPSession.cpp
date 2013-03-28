@@ -14,7 +14,16 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/system/system_error.hpp>
 
+
 #include <boost/thread.hpp>
+
+#if defined __linux__
+#include <sys/types.h>
+#include <sys/socket.h>
+typedef int SOCKET;
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR   -1
+#endif
 
 using boost::asio::ip::tcp;
 
@@ -28,6 +37,18 @@ TCPSession::TCPSession(boost::asio::io_service& io_service, unsigned int port): 
 {
     boost::asio::socket_base::keep_alive keepAlive(true);
     socket_.set_option(keepAlive);
+#if defined __linux__
+    SOCKET native_sock = socket_.native();
+    int result = -1;
+    
+    if (INVALID_SOCKET != native_sock)
+    {
+        result = setsockopt(native_sock, TCP_KEEPIDLE, 1, sizeof(int));
+        result = setsockopt(native_sock, TCP_KEEPINTVL, 1, sizeof(int));
+        result = setsockopt(native_sock, TCP_KEEPCNT, 10, sizeof(int));
+        std::cout << "changed keepalive "<<result<<std::endl;
+    }
+#endif
     setAOStream(&socket_);
 }
 
