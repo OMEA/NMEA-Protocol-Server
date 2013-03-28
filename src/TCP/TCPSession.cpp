@@ -43,9 +43,9 @@ TCPSession::TCPSession(boost::asio::io_service& io_service, unsigned int port): 
     
     if (INVALID_SOCKET != native_sock)
     {
-        result = setsockopt(native_sock, TCP_KEEPIDLE, 1, sizeof(int));
-        result = setsockopt(native_sock, TCP_KEEPINTVL, 1, sizeof(int));
-        result = setsockopt(native_sock, TCP_KEEPCNT, 10, sizeof(int));
+        result = setsockopt(native_sock, SOL_SOCKET, TCP_KEEPIDLE, 1, sizeof(int));
+        result = setsockopt(native_sock, SOL_SOCKET, TCP_KEEPINTVL, 1, sizeof(int));
+        result = setsockopt(native_sock, SOL_SOCKET, TCP_KEEPCNT, 10, sizeof(int));
         std::cout << "changed keepalive "<<result<<std::endl;
     }
 #endif
