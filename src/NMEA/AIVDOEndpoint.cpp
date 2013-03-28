@@ -70,6 +70,16 @@ void AIVDOEndpoint::sendPositionReportClassA(){
     msg->setPayload(payload);
     msg->setFillBits(pr->getBitLength()%6);
     receive(msg);
+    
+    AIVDmsg_ptr msg2(new AIVDmsg(this->v_shared_from_this(), false));
+    msg2->setFragmentCount(1);
+    msg2->setFragment(1);
+    msg2->setMessageId(0);
+    msg2->setChannelCode('B');
+    std::string payload2 = pr->toCodedStr();
+    msg2->setPayload(payload2);
+    msg2->setFillBits(pr->getBitLength()%6);
+    receive(msg2);
 }
 
 void AIVDOEndpoint::deliver_impl(NMEAmsg_ptr msg){
