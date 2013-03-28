@@ -26,6 +26,8 @@ TCPSession* TCPSession::factory(boost::shared_ptr<Endpoint> connectedTo, boost::
 
 TCPSession::TCPSession(boost::asio::io_service& io_service, unsigned int port): socket_(io_service), port(port)
 {
+    boost::asio::socket_base::keep_alive keepAlive(true);
+    socket_.set_option(keepAlive);
     setAOStream(&socket_);
 }
 
