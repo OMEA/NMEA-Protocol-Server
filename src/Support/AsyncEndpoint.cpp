@@ -121,13 +121,14 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
     }
     else
     {
-        if(persist){
-            AsyncEndpoint<T>::deactivateSession(this->shared_from_this());
-            std::cout << "Session deactivated"<<std::endl;
-        }
-        else{
-            unregisterEndpoint();
-        }
+        stop();
+//        if(persist){
+//            AsyncEndpoint<T>::deactivateSession(this->shared_from_this());
+//            std::cout << "Session deactivated"<<std::endl;
+//        }
+//        else{
+//            unregisterEndpoint();
+//        }
     }
 }
 
@@ -152,13 +153,14 @@ template<class T> void AsyncEndpoint<T>::handle_write(const boost::system::error
         }
         else
         {
-            if(persist){
-                AsyncEndpoint<T>::deactivateSession(this->shared_from_this());
-                std::cout << "Session deactivated"<<std::endl;
-            }
-            else{
-                unregisterEndpoint();
-            }
+            stop();
+//            if(persist){
+//                AsyncEndpoint<T>::deactivateSession(this->shared_from_this());
+//                std::cout << "Session deactivated"<<std::endl;
+//            }
+//            else{
+//                unregisterEndpoint();
+//            }
         }
     }
 }
