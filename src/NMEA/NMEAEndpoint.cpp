@@ -32,6 +32,8 @@ void NMEAEndpoint::initialize(){
     registerStringVectorCmd("out_black","Outgoing Blacklist", "Define Message-Ids of outgoing messages that should be dropped. You can use * for generalization (e.g. GS* to match GSV and GSL).",  &out_black, true);
     registerStringVectorCmd("out_white","Outgoing Whitelist", "Define Message-Ids of outgoing messages that should never be dropped. You can use * for generalization (e.g. GS* to match GSV and GSL).",  &out_white, true);
     registerBoolCmd("stats", "Statistics", "When on, stats are calculated", &stats_enabled, false, true);
+    boost::function<void (Command_ptr)> func = boost::bind(&NMEAEndpoint::print_stats_cmd, this, _1);
+    registerVoidCmd("print_stats","Print statistics", "Prints the statistics when enabled. See also [stats] command",  func);
     //boost::function<void (Command_ptr)> func = boost::bind(&NMEAEndpoint::add_midpoint_cmd, this, _1);
     //registerVoidCmd("add_midpoint","Midpoint hinzufügen", "Add a midpoint and connect it between this endpoint and the Endpoint it is connected to. Midpoint type and arguments must be passed.",  func);
     stat_list_size=60;
@@ -51,6 +53,26 @@ void NMEAEndpoint::add_midpoint_cmd(Command_ptr command){
     catch(std::exception& e){
         command->answer(Answer::WRONG_ARGS, "Cannot understand "+command->getArguments()+" for command "+command->getCommand()+". Not a midpoint class\n", v_shared_from_this());
     }
+}
+
+void NMEAEndpoint::print_stats_cmd(Command_ptr command){
+    std::ostringstream oss;
+    oss << "Statistics for " << getId() << std::endl << "---------------------------------------" << std::endl;
+    if(stats_enabled){
+        boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
+        boost::posix_time::ptime out_oldest = out_stat_list.front().first;
+        double out_msg_per_sec = ((double)out_stat_list.size()*1000)/(now-out_oldest).total_microseconds();
+        double out_byte_per_sec = ((double)out_total_size*1000)/(now-out_oldest).total_microseconds();
+        boost::posix_time::ptime in_oldest = in_stat_list.front().first;
+        double in_msg_per_sec = ((double)in_stat_list.size()*1000)/(now-in_oldest).total_microseconds();
+        double in_byte_per_sec = ((double)in_total_size*1000)/(now-in_oldest).total_microseconds();
+        
+        oss << "output messages per second:" << '\t' << out_msg_per_sec << std::endl;
+        oss << "output bytes per second:" << '\t' << out_byte_per_sec << std::endl;
+        oss << "input messages per second:" << '\t' << in_msg_per_sec << std::endl;
+        oss << "input bytes per second:" << '\t' << in_byte_per_sec << std::endl;
+    }
+    command->answer(oss.str(), this->v_shared_from_this());
 }
 
 void NMEAEndpoint::deliver(NMEAmsg_ptr msg){

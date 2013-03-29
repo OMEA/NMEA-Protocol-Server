@@ -39,9 +39,9 @@ void TCPSession::initialize(){
     registerUIntCmd("icmp_timeouts","ICMP Keepalive protection timeouts", "Defines the number of allowed timeouts. -1 means infinite and turns of the keep-alive packets", &icmp_maxtimeouts, 5, 1, 3600, true);
     boost::function<void (Command_ptr)> func = boost::bind(&TCPSession::enable_icmp_cmd, this, _1);
     registerVoidCmd("icmp","ICMP Keepalive protection", "Enables or disables the ICMP keepalive protection. Allowed parameters are on or off. The command checks whether ICMP is enabled on the remote host before enabling.",  func);
-    unregisterCmd("stats");
-    boost::function<void (Command_ptr)> func2 = boost::bind(&TCPSession::stats_cmd, this, _1);
-    registerVoidCmd("stats","Print Session statistics", "Prints statistics about the session.",  func2);
+    unregisterCmd("print_stats");
+    boost::function<void (Command_ptr)> func2 = boost::bind(&TCPSession::print_stats_cmd, this, _1);
+    registerVoidCmd("print_stats","Print Session statistics", "Prints statistics about the session.",  func2);
     icmp_keepalive=false;
     stat_roundtrip_ms=-1;
     lost_icmp_packets=0;
@@ -81,8 +81,8 @@ void TCPSession::enable_icmp_cmd(Command_ptr command){
     }
 }
 
-void TCPSession::stats_cmd(Command_ptr command){
-    AsyncEndpoint<boost::asio::ip::tcp::socket>::stats_cmd(command);
+void TCPSession::print_stats_cmd(Command_ptr command){
+    AsyncEndpoint<boost::asio::ip::tcp::socket>::print_stats_cmd(command);
     std::ostringstream oss;
     oss << "Current Roundtrip delay: " << '\t' << stat_roundtrip_ms << "ms" << std::endl;
     oss << "Lost ICMP Packets (total): " << '\t' << lost_icmp_packets << std::endl;

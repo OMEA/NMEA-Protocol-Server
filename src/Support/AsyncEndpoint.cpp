@@ -24,8 +24,9 @@ template<class T> void AsyncEndpoint<T>::initialize(){
     registerUIntCmd("queue_size","Message Queue Size", "Defines the maximum size of the message queue for this endpoint. See also [persist]", &message_queue_size, 10, 0, 65535, true);
     boost::function<void (Command_ptr)> func = boost::bind(&AsyncEndpoint<T>::exit_cmd, this, _1);
     registerVoidCmd("exit","End Session", "Ends the session and disconnects the remote host. Command does not take any arguments.",  func);
-    boost::function<void (Command_ptr)> func2 = boost::bind(&AsyncEndpoint<T>::stats_cmd, this, _1);
-    registerVoidCmd("stats","Print Session statistics", "Prints statistics about the session.",  func2);
+    unregisterCmd("print_stats");
+    boost::function<void (Command_ptr)> func2 = boost::bind(&AsyncEndpoint<T>::print_stats_cmd, this, _1);
+    registerVoidCmd("print_stats","Print Session statistics", "Prints statistics about the session.",  func2);
     isActive=false;
 }
 
@@ -43,10 +44,8 @@ template<class T> void AsyncEndpoint<T>::exit_cmd(Command_ptr command){
     }
 }
 
-template<class T> void AsyncEndpoint<T>::stats_cmd(Command_ptr command){
-    std::ostringstream oss;
-    oss << "Statistics for " << getId() << std::endl << "---------------------------------------" << std::endl;
-    command->answer(oss.str(), this->shared_from_this());
+template<class T> void AsyncEndpoint<T>::print_stats_cmd(Command_ptr command){
+    NMEAEndpoint::print_stats_cmd(command);
 }
 
 template<class T> void AsyncEndpoint<T>::deliver_impl(NMEAmsg_ptr msg){

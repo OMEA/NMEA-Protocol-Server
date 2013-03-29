@@ -31,7 +31,7 @@ protected:
     virtual void initialize();
 protected:
     void exit_cmd(Command_ptr command);
-    void stats_cmd(Command_ptr command);
+    void print_stats_cmd(Command_ptr command);
 public:
     ~AsyncEndpoint();
     

@@ -48,8 +48,9 @@ protected:
     bool check_checksum;
     int incompress_messages;
     int outcompress_messages;
-private:
+protected:
     void add_midpoint_cmd(Command_ptr command);
+    void print_stats_cmd(Command_ptr command);
 private:
     bool compress(NMEAmsg_ptr msg, std::map<std::string,std::pair<std::size_t, unsigned int> > *hashes, int num_messages);
     bool black_and_white(NMEAmsg_ptr msg, const std::vector<std::string> *blacklist, const std::vector<std::string> *whitelist);

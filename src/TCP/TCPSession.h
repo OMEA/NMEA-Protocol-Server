@@ -35,7 +35,7 @@ public:
     virtual void initialize();
 private:
     void enable_icmp_cmd(Command_ptr command);
-    void stats_cmd(Command_ptr command);
+    void print_stats_cmd(Command_ptr command);
 private:
     tcp::socket socket_;
     unsigned int port;
