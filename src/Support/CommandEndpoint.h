@@ -28,15 +28,20 @@ public:
     virtual ~CommandEndpoint(){}
     virtual void receive(Command_ptr command);
     virtual void deliver(Command_ptr command);
+    virtual void receive(Answer_ptr answer);
     virtual void deliver(Answer_ptr answer);
+    
+    void log(std::string message);
 private:
     void id_cmd(Command_ptr command);
-    
+protected:
+    std::vector<std::string> log_destination;
 protected:
     void unregisterCmd(std::string name);
     void registerBoolCmd(std::string name, std::string speakingName, std::string description, bool *boolean, bool defaultValue, bool writeable=true);
     void registerUIntCmd(std::string name, std::string speakingName, std::string description, unsigned int *uint, unsigned int defaultValue, unsigned int min=0, unsigned int max=UINT_MAX, bool writeable=true);
     void registerIntCmd(std::string name, std::string speakingName, std::string description, int *int_, int defaultValue, int min, int max, bool writeable);
+    void registerStringCmd(std::string name, std::string speakingName, std::string description, std::string *string, std::string defaultValue, bool writeable);
     void registerStringVectorCmd(std::string name, std::string speakingName, std::string description, std::vector<std::string> *vector, bool writeable);
     void registerVoidCmd(std::string name, std::string speakingName, std::string description, boost::function<void (Command_ptr)> &func);
     virtual void registerEndpoint();

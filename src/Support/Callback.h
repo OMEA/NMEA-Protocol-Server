@@ -71,6 +71,15 @@ private:
     int *int_;
 };
 
+class StringCallback: public MemberCallback{
+public:
+    StringCallback(std::string name, std::string speakingName, std::string description, std::string *string, bool writeable): MemberCallback(name, speakingName, description, writeable), string(string){}
+    virtual void execute(Command_ptr command, CommandEndpoint_ptr instance);
+    virtual const std::string to_str() const;
+private:
+    std::string *string;
+};
+
 class StringVectorCallback: public MemberCallback{
 public:
     StringVectorCallback(std::string name, std::string speakingName, std::string description, std::vector<std::string> *vector, bool writeable): MemberCallback(name, speakingName, description, writeable), vector(vector){}

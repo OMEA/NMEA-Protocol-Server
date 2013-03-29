@@ -175,7 +175,7 @@ template<class T> void AsyncEndpoint<T>::stop()
 {
     if(persist){
         AsyncEndpoint<T>::deactivateSession(this->shared_from_this());
-        std::cout << "Session deactivated"<<std::endl;
+        log("Session deactivated");
     }
     else{
         unregisterEndpoint();
@@ -192,7 +192,7 @@ template<class T> void AsyncEndpoint<T>::start()
             boost::mutex::scoped_lock lock(message_queueMutex);
             message_queue = std::deque<Message_ptr>(activated->message_queue);
         }
-        std::cout << "Session reactivated"<<std::endl;
+        log("Session reactivated");
         boost::system::error_code ec(0,boost::system::system_category());
         handle_write(ec);
     }

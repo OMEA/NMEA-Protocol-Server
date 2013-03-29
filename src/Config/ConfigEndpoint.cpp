@@ -82,10 +82,13 @@ void ConfigEndpoint::receive(Command_ptr command){
 }
 
 void ConfigEndpoint::deliverAnswer_impl(Answer_ptr answer){
-    std::cout<<getId()<<":"<<*answer->getOriginCmd()<<std::endl;
+    std::ostringstream oss;
+    oss << getId()<<":"<<*answer->getOriginCmd()<<std::endl;
+
     if(answer->getType()!=Answer::UNKNOWN_RECEIVER){
-        std::cout<<getId()<<":"<<*answer;
+        oss<<getId()<<":"<<*answer;
     }
+    log(oss.str());
 }
 
 
@@ -111,7 +114,9 @@ void ConfigEndpoint::load(std::string configname){
                 commands.push_back(command);
             }
             catch (const std::invalid_argument& ia) {
-                std::cerr << "Received a command that might not be conform with command format: " << line << std::endl;
+                std::ostringstream oss;
+                oss << "Found a command that might not be conform with command format: " << line;
+                log(oss.str());
             }
         }
     }

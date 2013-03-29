@@ -14,6 +14,9 @@ Endpoint::Endpoint(boost::shared_ptr<Endpoint> connectedTo){
     setConnectedTo(connectedTo);
 }
 
+void Endpoint::initialize(){
+}
+
 void Endpoint::registerEndpoint(){
     NMEAMidpoint_ptr nmeaMidpoint = boost::dynamic_pointer_cast<NMEAMidpoint>(connectedTo);
     if(nmeaMidpoint){

@@ -61,11 +61,11 @@ void NMEAEndpoint::print_stats_cmd(Command_ptr command){
     if(stats_enabled){
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
         boost::posix_time::ptime out_oldest = out_stat_list.front().first;
-        double out_msg_per_sec = ((double)out_stat_list.size()*1000)/(now-out_oldest).total_microseconds();
-        double out_byte_per_sec = ((double)out_total_size*1000)/(now-out_oldest).total_microseconds();
+        double out_msg_per_sec = ((double)out_stat_list.size()*1000)/(double)(now-out_oldest).total_microseconds();
+        double out_byte_per_sec = ((double)out_total_size*1000)/(double)(now-out_oldest).total_microseconds();
         boost::posix_time::ptime in_oldest = in_stat_list.front().first;
-        double in_msg_per_sec = ((double)in_stat_list.size()*1000)/(now-in_oldest).total_microseconds();
-        double in_byte_per_sec = ((double)in_total_size*1000)/(now-in_oldest).total_microseconds();
+        double in_msg_per_sec = ((double)in_stat_list.size()*1000)/(double)(now-in_oldest).total_microseconds();
+        double in_byte_per_sec = ((double)in_total_size*1000)/(double)(now-in_oldest).total_microseconds();
         
         oss << "output messages per second:" << '\t' << out_msg_per_sec << std::endl;
         oss << "output bytes per second:" << '\t' << out_byte_per_sec << std::endl;

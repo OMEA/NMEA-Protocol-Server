@@ -20,7 +20,7 @@ class Command;
 class Answer: public Message
 {
 public:
-    enum Type {SUCCESS=0, UNSPEC_ERROR, UNKNOWN_RECEIVER, UNKNOWN_CMD, WRONG_ARGS};
+    enum Type {SUCCESS=0, LOG, UNSPEC_ERROR, UNKNOWN_RECEIVER, UNKNOWN_CMD, WRONG_ARGS};
 public:
     Answer(Answer::Type type, std::string parseMessage, Endpoint_ptr sender, boost::shared_ptr<Command> origin_cmd);
     virtual ~Answer(){}

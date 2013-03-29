@@ -172,6 +172,38 @@ const std::string IntCallback::to_str() const{
     return ss.str();
 }
 
+void StringCallback::execute(Command_ptr command, CommandEndpoint_ptr instance){
+    std::ostringstream ss;
+    if(command->getCommand()==name){
+        if(command->getArguments().length()==0){
+            ss<<speakingName<<" is " << *string << '\n';
+            command->answer(ss.str(), instance);
+        }
+        else{
+            if(writeable){
+                *string = command->getArguments();
+                ss<< speakingName << " changed to " <<  *string << "\n";
+            }
+            else{
+                ss<<speakingName<< " is not writeable\n";
+                command->answer(ss.str(), instance);
+            }
+        }
+    }
+}
+
+const std::string StringCallback::to_str() const{
+    std::ostringstream ss;
+    ss << Callback::to_str();
+    if(writeable){
+        ss << " The command takes a string as an argument to change the property and can be read with an empy argument.";
+    }
+    else{
+        ss << "The property is read-only and cannot be changed.";
+    }
+    return ss.str();
+}
+
 void StringVectorCallback::execute(Command_ptr command, CommandEndpoint_ptr instance){
     std::ostringstream oss;
     if(command->getArguments().length()==0){

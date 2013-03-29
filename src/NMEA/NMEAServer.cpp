@@ -17,8 +17,14 @@
 #include "../NMEA/AISEndpoint.h"
 #include "../NMEA/AIVDOEndpoint.h"
 
+static NMEAServer_ptr theInstance = NMEAServer_ptr();
+
 NMEAServer_ptr NMEAServer::getInstance() {
-    static NMEAServer_ptr theInstance(new NMEAServer());
+    
+    if(theInstance==NULL){
+        theInstance = NMEAServer_ptr(new NMEAServer());
+        theInstance->initialize();
+    }
     return theInstance;
 }
 
@@ -44,7 +50,9 @@ void NMEAServer::endpointOnline(Endpoint_ptr endpoint){
         boost::mutex::scoped_lock lock(onlineMutex);
         online.push_back(endpoint);
     }
-    std::cout << "Client registred, now having " << online.size() << " ("<<online.size()+offline.size()<<") clients" << std::endl;
+    std::ostringstream oss;
+    oss << "Client registred, now having " << online.size() << " ("<<online.size()+offline.size()<<") clients";
+    log(oss.str());
 }
 void NMEAServer::endpointOffline(Endpoint_ptr endpoint){
     {
@@ -55,8 +63,9 @@ void NMEAServer::endpointOffline(Endpoint_ptr endpoint){
         boost::mutex::scoped_lock lock(offlineMutex);
         offline.push_back(endpoint);
     }
-    
-    std::cout << "Client unregistred, now having " << online.size() << " ("<<online.size()+offline.size()<<") clients" << std::endl;
+    std::ostringstream oss;
+    oss << "Client unegistred, now having " << online.size() << " ("<<online.size()+offline.size()<<") clients";
+    log(oss.str());
 }
 
 void NMEAServer::receive(Command_ptr msg){
@@ -206,6 +215,9 @@ void NMEAServer::run(){
                 }
             }
             else if(Command_ptr tmp_cmd = boost::dynamic_pointer_cast<Command>(msgs_cpy.front())){
+                if(tmp_cmd->getReceiver()=="*"){
+                    receiveCommand(tmp_cmd);
+                }
                 if(tmp_cmd->getReceiver()=="server"){
                     receiveCommand(tmp_cmd);
                 }
@@ -228,6 +240,32 @@ void NMEAServer::run(){
                     }
                     if(!found){
                         tmp_cmd->answer(Answer::UNKNOWN_RECEIVER, "The receiver "+tmp_cmd->getReceiver()+" was not found \n", this->shared_from_this());
+                    }
+                }
+            }
+            else if(Answer_ptr tmp_answer = boost::dynamic_pointer_cast<Answer>(msgs_cpy.front())){
+                if(tmp_answer->getReceiver()=="*"){
+                    deliver(tmp_answer);
+                }
+                if(tmp_answer->getReceiver()=="server"){
+                    deliver(tmp_answer);
+                }
+                else{
+                    bool found=false;
+                    for (std::list<Endpoint_ptr>::const_iterator endpoint = online_cpy.begin(), end = online_cpy.end(); endpoint != end; ++endpoint) {
+                        std::string receiver = tmp_answer->getReceiver();
+                        boost::replace_all(receiver, "*", "(.*)");
+                        boost::regex reg("^"+receiver+"$");
+                        boost::cmatch matches;
+                        CommandEndpoint_ptr commandEnd = boost::dynamic_pointer_cast<CommandEndpoint>(*endpoint);
+                        if(commandEnd){
+                            if(boost::regex_search(commandEnd->getId().c_str(), matches, reg)){
+                                if(tmp_answer->getSender()!=commandEnd){
+                                    commandEnd->deliver(tmp_answer);
+                                    found=true;
+                                }
+                            }
+                        }
                     }
                 }
             }

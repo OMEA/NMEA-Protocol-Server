@@ -14,8 +14,10 @@
 CommandEndpoint::CommandEndpoint(boost::shared_ptr<Endpoint> connectedTo): Endpoint(connectedTo){}
 
 void CommandEndpoint::initialize(){
+    Endpoint::initialize();
     boost::function<void (Command_ptr)> func = boost::bind(&CommandEndpoint::id_cmd, this, _1);
     registerVoidCmd("id","Identifier", "The identifier of the endpoint. The property is read-only.",  func);
+    registerStringVectorCmd("log_destination","Destination to log to", "Define an end point to which log messages are sent.",  &log_destination, true);
 }
 
 void CommandEndpoint::id_cmd(Command_ptr command){
@@ -40,6 +42,27 @@ void CommandEndpoint::deliver(Command_ptr command){
             }
         }
     }
+}
+
+void CommandEndpoint::receive(Answer_ptr answer){
+    if((*answer).getReceiver()=="local"){
+        deliver(answer);
+    }
+    else{
+        if(!getConnectedTo()){
+            std::cerr << getId()<<": Endpoint is unconnected" << std::endl;
+        }
+        else{
+            CommandEndpoint_ptr cmdEndpoint = boost::dynamic_pointer_cast<CommandEndpoint>(getConnectedTo());
+            if(cmdEndpoint){
+                cmdEndpoint->receive(answer);
+            }
+            else{
+                std::cerr << getId()<<":deliver Cannot send Answer to none CommandEndpoint" << std::endl;
+            }
+        }
+    }
+    
 }
 
 void CommandEndpoint::deliver(Answer_ptr answer){
@@ -98,7 +121,21 @@ void CommandEndpoint::registerStringVectorCmd(std::string name, std::string spea
     registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
 }
 
+void CommandEndpoint::registerStringCmd(std::string name, std::string speakingName, std::string description, std::string *string, std::string defaultValue, bool writeable){
+    *string = defaultValue;
+    Callback_ptr callback(new StringCallback(name, speakingName, description, string, writeable));
+    registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
+}
+
 void CommandEndpoint::registerVoidCmd(std::string name, std::string speakingName, std::string description, boost::function<void (Command_ptr)> &func){
     Callback_ptr callback(new VoidCallback(name, speakingName, description, func));
     registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
+}
+
+void CommandEndpoint::log(std::string message){
+    for(std::vector<std::string>::iterator destination = log_destination.begin(); destination!=log_destination.end();++destination){
+        Answer_ptr answer = Answer_ptr(new Answer(Answer::LOG, message, v_shared_from_this(), Command_ptr()));
+        answer->setReceiver(*destination);
+        receive(answer);
+    }
 }
