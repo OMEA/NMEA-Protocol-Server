@@ -23,6 +23,7 @@ void NMEAEndpoint::initialize(){
     registerBoolCmd("output", "Output mode", "When on, messages comming from the Server are sent to the remote end, otherwise messages are discarded.", &output, true, true);
     registerBoolCmd("mirror", "Mirror mode", "When on, messages comming from the Server are sent to the remote end even if they were originally coming from there", &portmirror, false, true);
     registerBoolCmd("checksum", "Print checksums", "When on, messages are sent with their checksum (*XX)", &checksum, true, true);
+    registerBoolCmd("force_checksum", "Force checksum check", "When on, messages are checked against their checksum (*XX)", &check_checksum, false, true);
     registerIntCmd("incompress","Input Compressor Number", "Defines the maximum number of consecutive incoming messages that are compressed. 0 = no compresson; -1 = infinite compression", &incompress_messages, 0, -1, std::numeric_limits<int>::max(), true);
     registerIntCmd("outcompress","Output Compressor Number", "Defines the maximum number of consecutive outgoing messages that are compressed. 0 = no compresson; -1 = infinite compression", &outcompress_messages, 0, -1, std::numeric_limits<int>::max(), true);
     
@@ -30,8 +31,12 @@ void NMEAEndpoint::initialize(){
     registerStringVectorCmd("in_white","Incoming Whitelist", "Define Message-Ids of incoming messages that should never be dropped. You can use * for generalization (e.g. GS* to match GSV and GSL).",  &in_white, true);
     registerStringVectorCmd("out_black","Outgoing Blacklist", "Define Message-Ids of outgoing messages that should be dropped. You can use * for generalization (e.g. GS* to match GSV and GSL).",  &out_black, true);
     registerStringVectorCmd("out_white","Outgoing Whitelist", "Define Message-Ids of outgoing messages that should never be dropped. You can use * for generalization (e.g. GS* to match GSV and GSL).",  &out_white, true);
+    registerBoolCmd("stats", "Statistics", "When on, stats are calculated", &stats_enabled, false, true);
     //boost::function<void (Command_ptr)> func = boost::bind(&NMEAEndpoint::add_midpoint_cmd, this, _1);
     //registerVoidCmd("add_midpoint","Midpoint hinzufügen", "Add a midpoint and connect it between this endpoint and the Endpoint it is connected to. Midpoint type and arguments must be passed.",  func);
+    stat_list_size=60;
+    in_total_size=0;
+    out_total_size=0;
 }
 
 void NMEAEndpoint::add_midpoint_cmd(Command_ptr command){
@@ -49,12 +54,19 @@ void NMEAEndpoint::add_midpoint_cmd(Command_ptr command){
 }
 
 void NMEAEndpoint::deliver(NMEAmsg_ptr msg){
-    if(output && (portmirror || msg->getSender()!=this->v_shared_from_this()) && black_and_white(msg, &out_black, &out_white) && !compress(msg, &outcompressor_hashes,outcompress_messages))
+    if(output && (portmirror || msg->getSender()!=this->v_shared_from_this()) && black_and_white(msg, &out_black, &out_white) && !compress(msg, &outcompressor_hashes,outcompress_messages)){
+        if(stats_enabled){
+            update_stats_deliver(msg);
+        }
         deliver_impl(msg);
+    }
 }
 
 void NMEAEndpoint::receive(NMEAmsg_ptr msg){
     if(input && black_and_white(msg, &in_black, &in_white) && !compress(msg, &incompressor_hashes,incompress_messages)){
+        if(stats_enabled){
+            update_stats_receive(msg);
+        }
         receive_impl(msg);
     }
 }
@@ -116,4 +128,24 @@ bool NMEAEndpoint::black_and_white(NMEAmsg_ptr msg, const std::vector<std::strin
         }
     }
     return true;
+}
+
+void NMEAEndpoint::update_stats_deliver(NMEAmsg_ptr msg){
+    if(out_stat_list.size()>=stat_list_size){
+        std::pair<boost::posix_time::ptime, size_t> front = out_stat_list.front();
+        out_total_size-=front.second;
+        out_stat_list.pop_front();
+    }
+    out_total_size+=msg->length();
+    out_stat_list.push_back(std::pair<boost::posix_time::ptime, size_t>(msg->getReceived(), msg->length()));
+}
+
+void NMEAEndpoint::update_stats_receive(NMEAmsg_ptr msg){
+    if(in_stat_list.size()>=stat_list_size){
+        std::pair<boost::posix_time::ptime, size_t> front = in_stat_list.front();
+        in_total_size-=front.second;
+        in_stat_list.pop_front();
+    }
+    in_total_size+=msg->length();
+    in_stat_list.push_back(std::pair<boost::posix_time::ptime, size_t>(msg->getReceived(), msg->length()));
 }

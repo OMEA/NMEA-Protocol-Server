@@ -24,7 +24,8 @@ template<class T> void AsyncEndpoint<T>::initialize(){
     registerUIntCmd("queue_size","Message Queue Size", "Defines the maximum size of the message queue for this endpoint. See also [persist]", &message_queue_size, 10, 0, 65535, true);
     boost::function<void (Command_ptr)> func = boost::bind(&AsyncEndpoint<T>::exit_cmd, this, _1);
     registerVoidCmd("exit","End Session", "Ends the session and disconnects the remote host. Command does not take any arguments.",  func);
-    
+    boost::function<void (Command_ptr)> func2 = boost::bind(&AsyncEndpoint<T>::stats_cmd, this, _1);
+    registerVoidCmd("stats","Print Session statistics", "Prints statistics about the session.",  func2);
     isActive=false;
 }
 
@@ -40,6 +41,12 @@ template<class T> void AsyncEndpoint<T>::exit_cmd(Command_ptr command){
     {
         std::cerr << "TCPSession Exception: " << e.what() << "\n";
     }
+}
+
+template<class T> void AsyncEndpoint<T>::stats_cmd(Command_ptr command){
+    std::ostringstream oss;
+    oss << "Statistics for " << getId() << std::endl << "---------------------------------------" << std::endl;
+    command->answer(oss.str(), this->shared_from_this());
 }
 
 template<class T> void AsyncEndpoint<T>::deliver_impl(NMEAmsg_ptr msg){
@@ -103,7 +110,7 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
                 else if(data.find('$')!=std::string::npos || data.find('!')!=std::string::npos){
                     if(input){
                         try {
-                            NMEAmsg_ptr msg = NMEAmsg::factory(tmpString, this->shared_from_this());
+                            NMEAmsg_ptr msg = NMEAmsg::factory(tmpString, this->shared_from_this(), check_checksum);
                             receive(msg);
                         }
                         catch (const std::invalid_argument& ia) {

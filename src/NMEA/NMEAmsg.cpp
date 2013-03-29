@@ -15,17 +15,17 @@
 #include <algorithm>
 #include <locale>
 
-boost::shared_ptr<NMEAmsg> NMEAmsg::factory(std::string parseMsg, Endpoint_ptr sender) {
+boost::shared_ptr<NMEAmsg> NMEAmsg::factory(std::string parseMsg, Endpoint_ptr sender, bool check_checksum) {
     boost::shared_ptr<NMEAmsg> newMsg;
     std::string id=parseMsg.substr(1, parseMsg.find_first_of(',',2)-1);
     if(id=="GPRMC"){
-        newMsg = boost::shared_ptr<RMCmsg>(new RMCmsg(parseMsg, sender));
+        newMsg = boost::shared_ptr<RMCmsg>(new RMCmsg(parseMsg, sender, check_checksum));
     }
     else if(id=="AIVDO" || id=="AIVDM"){
-        newMsg = boost::shared_ptr<AIVDmsg>(new AIVDmsg(parseMsg, sender));
+        newMsg = boost::shared_ptr<AIVDmsg>(new AIVDmsg(parseMsg, sender, check_checksum));
     }
     else{
-        newMsg = boost::shared_ptr<NMEAmsg>(new NMEAmsg(parseMsg, sender));
+        newMsg = boost::shared_ptr<NMEAmsg>(new NMEAmsg(parseMsg, sender, check_checksum));
     }
     return newMsg;
 }
@@ -37,23 +37,16 @@ NMEAmsg::NMEAmsg(Endpoint_ptr sender, char start, std::string id): Message(sende
     this->msg="none";
 }
 
-NMEAmsg::NMEAmsg(std::string parseMsg, Endpoint_ptr sender): Message(sender){
-    boost::regex reg("^([!\\$])([[:alnum:]]{1,5}),([^\\*]+)\\h?$");
-    boost::regex regChecksum("^([!\\$])([[:alnum:]]{1,5}),([^\\*]+)\\*([[:xdigit:]]{1,2})\\h?$");
+NMEAmsg::NMEAmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum): Message(sender){
+    boost::regex reg("^([!\\$])([[:alnum:]]{1,5}),([^\\*]+)(\\*?([[:xdigit:]]{2})?)\\h?$");
     boost::cmatch matches;
-    bool found=false;
     
-    if(boost::regex_search(parseMsg.c_str(), matches, regChecksum)){
-        found=true;
-    }
-    else if(boost::regex_search(parseMsg.c_str(), matches, reg)){
-        found=true;
-    }
-    if(found){
+    if(boost::regex_search(parseMsg.c_str(), matches, reg)){
         start=*matches[1].first;
         id=std::string(matches[2].first, matches[2].second);
         msg=std::string(matches[3].first, matches[3].second);
-        if(true){
+        std::string msgChecksum = matches[5];
+        if(check_checksum && msgChecksum.length()==2){
             std::string tmpString = std::string(matches[2].first, matches[3].second);
             char checksumchar = tmpString.at(0);
             for(unsigned int i = 1; i< tmpString.length();i++){
@@ -63,9 +56,9 @@ NMEAmsg::NMEAmsg(std::string parseMsg, Endpoint_ptr sender): Message(sender){
             sprintf(checksumhex, "%02X", checksumchar);
             std::string calcChecksum = std::string(checksumhex);
             //std::transform(calcChecksum.begin(), calcChecksum.end(), calcChecksum.begin(), std::toupper);
-            std::string msgChecksum = parseMsg.substr(parseMsg.find_first_of('*',2)+1);
+            msgChecksum = parseMsg.substr(parseMsg.find_first_of('*',2)+1);
             if(calcChecksum!=msgChecksum){
-                throw std::invalid_argument("Wrong checksum!");
+                throw std::invalid_argument("Wrong checksum!, should be "+calcChecksum+" instead of "+msgChecksum);
             }
         }
     }

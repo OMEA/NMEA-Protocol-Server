@@ -37,12 +37,15 @@ protected:
     virtual void deliver_impl(NMEAmsg_ptr msg)=0;
     virtual void receive_impl(NMEAmsg_ptr msg);
     virtual boost::shared_ptr<Endpoint> v_shared_from_this()=0;
-    
+private:
+    void update_stats_deliver(NMEAmsg_ptr msg);
+    void update_stats_receive(NMEAmsg_ptr msg);
 protected:
     bool input;
     bool output;
     bool portmirror;
     bool checksum;
+    bool check_checksum;
     int incompress_messages;
     int outcompress_messages;
 private:
@@ -57,6 +60,13 @@ private:
     std::vector<std::string> in_white;
     std::vector<std::string> out_black;
     std::vector<std::string> out_white;
+    
+    bool stats_enabled;
+    std::list<std::pair<boost::posix_time::ptime, size_t> > in_stat_list;
+    unsigned int in_total_size;
+    std::list<std::pair<boost::posix_time::ptime, size_t> > out_stat_list;
+    unsigned int out_total_size;
+    unsigned int stat_list_size;
 };
 
 typedef boost::shared_ptr<NMEAEndpoint> NMEAEndpoint_ptr;

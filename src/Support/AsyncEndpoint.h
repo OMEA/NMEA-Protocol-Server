@@ -29,8 +29,9 @@ protected:
     AsyncEndpoint();
     AsyncEndpoint(boost::shared_ptr<Endpoint> connectedTo);
     virtual void initialize();
-private:
+protected:
     void exit_cmd(Command_ptr command);
+    void stats_cmd(Command_ptr command);
 public:
     ~AsyncEndpoint();
     

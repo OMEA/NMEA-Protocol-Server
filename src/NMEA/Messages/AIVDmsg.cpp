@@ -23,7 +23,7 @@ char channelCode;
 std::string payload;
 unsigned char fillBits;
 
-AIVDmsg::AIVDmsg(std::string parseMsg, Endpoint_ptr sender): NMEAmsg(parseMsg, sender){
+AIVDmsg::AIVDmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum): NMEAmsg(parseMsg, sender, check_checksum){
     setMsg(NMEAmsg::getMsg());
 }
 

@@ -26,7 +26,7 @@
 #define MATCH_MONTH MATCH_DAY+1
 #define MATCH_YEAR MATCH_MONTH+1
 
-RMCmsg::RMCmsg(std::string parseMsg, Endpoint_ptr sender): NMEAmsg(parseMsg, sender){
+RMCmsg::RMCmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum): NMEAmsg(parseMsg, sender, check_checksum){
     boost::regex reg("^(\\d{2})(\\d{2})(\\d{2})(\\.\\d{1,3})?,([AV]),(\\d{2})(\\d{2}\\.\\d{4}),([NS]),(\\d{3})(\\d{2}\\.\\d{4}),([EW]),(\\d{1,2}\\.\\d{1,3}),(\\d{1,3}\\.\\d{1,3}),(\\d{2})(\\d{2})(\\d{2}),(\\d{1,3}\\.\\d{1,3})?,([EW])?,([ADENS])$");
     boost::cmatch matches;
     if(boost::regex_search(this->getMsg().c_str(), matches, reg)){

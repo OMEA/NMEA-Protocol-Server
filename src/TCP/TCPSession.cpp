@@ -39,7 +39,12 @@ void TCPSession::initialize(){
     registerUIntCmd("icmp_timeouts","ICMP Keepalive protection timeouts", "Defines the number of allowed timeouts. -1 means infinite and turns of the keep-alive packets", &icmp_maxtimeouts, 5, 1, 3600, true);
     boost::function<void (Command_ptr)> func = boost::bind(&TCPSession::enable_icmp_cmd, this, _1);
     registerVoidCmd("icmp","ICMP Keepalive protection", "Enables or disables the ICMP keepalive protection. Allowed parameters are on or off. The command checks whether ICMP is enabled on the remote host before enabling.",  func);
+    unregisterCmd("stats");
+    boost::function<void (Command_ptr)> func2 = boost::bind(&TCPSession::stats_cmd, this, _1);
+    registerVoidCmd("stats","Print Session statistics", "Prints statistics about the session.",  func2);
     icmp_keepalive=false;
+    stat_roundtrip_ms=-1;
+    lost_icmp_packets=0;
 }
 
 void TCPSession::enable_icmp_cmd(Command_ptr command){
@@ -71,6 +76,17 @@ void TCPSession::enable_icmp_cmd(Command_ptr command){
             command->answer("ICMP Keepalive protection already is disabled!\n", this->shared_from_this());
         }
     }
+    else{
+        command->answer(Answer::WRONG_ARGS, "Cannot understand command Argument "+command->getArguments()+" for Command "+command->getCommand()+"\n", this->shared_from_this());
+    }
+}
+
+void TCPSession::stats_cmd(Command_ptr command){
+    AsyncEndpoint<boost::asio::ip::tcp::socket>::stats_cmd(command);
+    std::ostringstream oss;
+    oss << "Current Roundtrip delay: " << '\t' << stat_roundtrip_ms << "ms" << std::endl;
+    oss << "Lost ICMP Packets (total): " << '\t' << lost_icmp_packets << std::endl;
+    command->answer(oss.str(), this->shared_from_this());
 }
 
 //TCPSession::TCPSession(boost::asio::io_service& io_service, unsigned int port): socket_(io_service), port(port), icmpsocket_(io_service, icmp::v4()), timer_(io_service), resolver_(io_service)
@@ -194,6 +210,7 @@ void TCPSession::icmp_test(){
 
 void TCPSession::icmp_timeout(){
     if (num_replies_ == 0){
+        lost_icmp_packets++;
         if(icmp_first_try){
             std::cout << "It seems as ICMP is not enabled on the remote Host, icmp-keepalive disabled" << std::endl;
             icmp_keepalive = false;
@@ -251,7 +268,8 @@ void TCPSession::icmp_handle_receive(std::size_t length){
             timer_.cancel();
         
         // Print out some information about the reply packet.
-        //boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
+        boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
+        stat_roundtrip_ms = (now - time_sent_).total_milliseconds();
         //std::cout << length - ipv4_hdr.header_length()
         //<< " bytes from " << ipv4_hdr.source_address()
         //<< ": icmp_seq=" << icmp_hdr.sequence_number()

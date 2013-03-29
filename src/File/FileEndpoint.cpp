@@ -96,7 +96,7 @@ void FileEndpoint::play(boost::posix_time::ptime from,  boost::posix_time::ptime
             else if(msg_or_cmd.find('$')!=std::string::npos || msg_or_cmd.find('!')!=std::string::npos){
                 if(input){
                     try {
-                        NMEAmsg_ptr msg = NMEAmsg::factory(msg_or_cmd, this->shared_from_this());
+                        NMEAmsg_ptr msg = NMEAmsg::factory(msg_or_cmd, this->shared_from_this(), check_checksum);
                         receive(msg);
                     }
                     catch (const std::invalid_argument& ia) {

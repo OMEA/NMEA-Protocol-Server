@@ -35,6 +35,7 @@ public:
     virtual void initialize();
 private:
     void enable_icmp_cmd(Command_ptr command);
+    void stats_cmd(Command_ptr command);
 private:
     tcp::socket socket_;
     unsigned int port;
@@ -57,6 +58,8 @@ private:
     unsigned int icmp_maxtimeouts;
     bool icmp_first_try;
     bool icmp_keepalive;
+    int stat_roundtrip_ms;
+    unsigned int lost_icmp_packets;
 };
 
 typedef boost::shared_ptr<TCPSession> TCPSession_ptr;

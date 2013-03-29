@@ -15,7 +15,7 @@
 
 class RMCmsg: public NMEAmsg {
 public:
-    RMCmsg(std::string parseMsg, Endpoint_ptr sender);
+    RMCmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum=false);
     void setTime(boost::posix_time::ptime time){this->time=time;}
     boost::posix_time::ptime getTime(){return time;}
     void setState(State state){this->state=state;}

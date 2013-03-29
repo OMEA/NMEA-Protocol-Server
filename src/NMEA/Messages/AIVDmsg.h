@@ -15,7 +15,7 @@
 
 class AIVDmsg: public NMEAmsg {
 public:
-    AIVDmsg(std::string parseMsg, Endpoint_ptr sender);
+    AIVDmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum=false);
     AIVDmsg(Endpoint_ptr sender, bool own);
     
     void setFragmentCount(unsigned int fragmentCount){this->fragmentCount=fragmentCount;}
