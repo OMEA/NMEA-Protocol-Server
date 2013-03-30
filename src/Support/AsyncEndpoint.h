@@ -62,6 +62,7 @@ private:
     bool persist;
     bool isActive;
     std::string sessionId;
+    bool wasFull;
 private:
     static std::map<std::string, boost::shared_ptr<AsyncEndpoint<T> > > sessions;
 public:

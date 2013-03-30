@@ -28,6 +28,7 @@ template<class T> void AsyncEndpoint<T>::initialize(){
     boost::function<void (Command_ptr)> func2 = boost::bind(&AsyncEndpoint<T>::print_stats_cmd, this, _1);
     registerVoidCmd("print_stats","Print Session statistics", "Prints statistics about the session.",  func2);
     isActive=false;
+    wasFull = false;
 }
 
 template<class T> AsyncEndpoint<T>::~AsyncEndpoint(){
@@ -50,13 +51,13 @@ template<class T> void AsyncEndpoint<T>::print_stats_cmd(Command_ptr command){
 
 template<class T> void AsyncEndpoint<T>::deliver_impl(NMEAmsg_ptr msg){
     bool wasEmpty = true;
-    bool wasFull = false;
+    bool nowFull = false;
     {
         boost::mutex::scoped_lock lock(message_queueMutex);
         wasEmpty = message_queue.empty();
         while(message_queue.size()>=message_queue_size){
             message_queue.pop_front();
-            wasFull=true;
+            nowFull=true;
         }
         message_queue.push_back(msg);
     }
@@ -64,8 +65,14 @@ template<class T> void AsyncEndpoint<T>::deliver_impl(NMEAmsg_ptr msg){
         boost::system::error_code ec(0,boost::system::system_category());
         handle_write(ec);
     }
-    else if(wasFull){
-        std::cerr << "The message queue for "<<getSessionId()<<" was too small, old messages were lost!"<<std::endl;
+    if(!nowFull){
+        wasFull=false;
+    }
+    else if(nowFull && !wasFull){
+        wasFull=true;
+        std::ostringstream oss;
+        oss << "The message queue for "<<getSessionId()<<" was too small, old messages were lost!";
+        log(oss.str());
     }
 }
 
