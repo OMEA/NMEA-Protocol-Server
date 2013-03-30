@@ -16,6 +16,7 @@
 #include "../NMEA/GPSEndpoint.h"
 #include "../NMEA/AISEndpoint.h"
 #include "../NMEA/AIVDOEndpoint.h"
+#include "../NMEA/MemoryStoreEndpoint.h"
 
 static NMEAServer_ptr theInstance = NMEAServer_ptr();
 
@@ -178,6 +179,13 @@ void NMEAServer::receiveCommand(Command_ptr command){
                         std::cerr << "virtualAIVDO: " << e.what() << "\n";
                         command->answer(Answer::WRONG_ARGS,"Cannot create virtualAIVDO. MMSI Arguemnt must be 9 digits\n", this->shared_from_this());
                     }
+                }
+                else if(type=="MemoryStore"){
+                    MemoryStoreEndpoint::factory(this->shared_from_this(), args);
+                    command->answer("New MemoryStoreEndpoint successfully created\n", this->shared_from_this());
+                }
+                else{
+                    command->answer(Answer::WRONG_ARGS, "Cannot understand command Argument "+command->getArguments()+" for Command "+command->getCommand()+". No such endpoint type to create.\n", this->shared_from_this());
                 }
             }
             else{

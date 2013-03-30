@@ -44,7 +44,8 @@ protected:
 private:
     void play(boost::posix_time::ptime from,  boost::posix_time::ptime to);
     std::deque<NMEAmsg_ptr> message_queue;
-    std::fstream file_stream;
+    std::ifstream in_file_stream;
+    std::ofstream out_file_stream;
     std::string filename;
     bool playback;
     bool recording;

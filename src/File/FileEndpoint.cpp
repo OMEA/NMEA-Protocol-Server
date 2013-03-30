@@ -24,7 +24,7 @@ void FileEndpoint::receive(Command_ptr command){
         command->answer("closed file "+filename+"\n", this_ptr);
     }
     else if(command->getCommand()=="restart"){
-        file_stream.seekg(0, file_stream.beg);
+        in_file_stream.seekg(0, in_file_stream.beg);
         command->answer("playback of "+getId()+" restarted at beginning\n", this->shared_from_this());
     }
     else if(command->getCommand()=="stop"){
@@ -45,21 +45,17 @@ void FileEndpoint::receive(Command_ptr command){
 }
 
 void FileEndpoint::deliver_impl(NMEAmsg_ptr msg){
-    if(recording && !playback){
-        file_stream<<  to_simple_string(msg->getReceived()) << " " << msg->data(true);
-        file_stream.flush();
+    if(recording){
+        out_file_stream << to_simple_string(msg->getReceived()) << " " << msg->data(true);
+        out_file_stream.flush();
     }
 }
 
 void FileEndpoint::record(){
-    stopPlayback();
-    file_stream.seekg(0, file_stream.end);
-    playback=false;
     recording=true;
 }
 
 void FileEndpoint::startPlayback(boost::posix_time::ptime from,  boost::posix_time::ptime to){
-    recording=false;
     playback=true;
     stopPlaybackNow=false;
     playbackThread = boost::thread(&FileEndpoint::play, this, from, to);
@@ -71,14 +67,14 @@ void FileEndpoint::stopPlayback(){
 
 //TODO Implement search and change find and add regex for lines without time
 void FileEndpoint::play(boost::posix_time::ptime from,  boost::posix_time::ptime to){
-    
-    file_stream.seekg(0, file_stream.beg);
+    in_file_stream.clear();
+    in_file_stream.seekg(0, in_file_stream.beg);
     
     //boost::regex reg("^([^ ]+\\s[^ ]+)\\s([[:print:]]+)\\h?");
     boost::regex reg("^(\\d{4}-.*-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}.\\d{1,10}\\s)?([[:print:]]+)\\h?");
     boost::cmatch matches;
     std::string line;
-    while(!stopPlaybackNow && std::getline(file_stream,line)){
+    while(!stopPlaybackNow && std::getline(in_file_stream, line)){
         line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
         line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
         if(boost::regex_search(line.c_str(), matches, reg)){
@@ -136,11 +132,14 @@ std::string FileEndpoint::getId(){
 
 void FileEndpoint::open(std::string filename){
     this->filename = filename;
-    file_stream.open(filename.c_str());
-    registerEndpoint(); }
+    in_file_stream.open(filename.c_str());
+    out_file_stream.open(filename.c_str(), std::ios_base::app);
+    registerEndpoint();
+}
 
 void FileEndpoint::close(){
     NMEAServer::getInstance()->endpointOffline(this->v_shared_from_this());
-    file_stream.close();
+    in_file_stream.close();
+    out_file_stream.close();
     NMEAServer::getInstance()->removeEndpoint(this->v_shared_from_this());
 }
