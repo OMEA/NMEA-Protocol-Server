@@ -174,7 +174,9 @@ void TCPSession::icmp_setup(){
     }
     catch (std::exception& e)
     {
-        std::cerr << "TCP Exception: " << e.what() << "\n";
+        std::ostringstream oss;
+        oss << "TCP Exception: " << e.what();
+        log(oss.str());
     }
     try{
         icmp_io_service.run();
@@ -184,7 +186,7 @@ void TCPSession::icmp_setup(){
 
 void TCPSession::icmp_test(){
     
-    std::string body("\"Hello!\" from Asio ping.");
+    std::string body("ping");
     icmp_header echo_request;
     echo_request.type(icmp_header::echo_request);
     echo_request.code(0);
@@ -212,12 +214,12 @@ void TCPSession::icmp_timeout(){
     if (num_replies_ == 0){
         lost_icmp_packets++;
         if(icmp_first_try){
-            std::cout << "It seems as ICMP is not enabled on the remote Host, icmp-keepalive disabled" << std::endl;
+            log("It seems as ICMP is not enabled on the remote Host, icmp-keepalive disabled");
             icmp_keepalive = false;
             icmpsocket_.close();
         }
         else{
-            std::cout << "Request timed out" << std::endl;
+            log("Request timed out");
             icmp_timeouts++;
             if(icmp_timeouts>icmp_maxtimeouts){
                 //stop();
