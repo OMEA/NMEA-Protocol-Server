@@ -135,7 +135,9 @@ void NMEAServer::receiveCommand(Command_ptr command){
                     }
                     catch (std::exception& e)
                     {
-                        std::cerr << "FileEndpoint Exception: " << e.what() << "\n";
+                        std::ostringstream oss;
+                        oss << "FileEndpoint Exception: " << e.what();
+                        log(oss.str());
                     }
                 }
                 else if(type=="tcp" || type=="TCP"){
@@ -146,7 +148,9 @@ void NMEAServer::receiveCommand(Command_ptr command){
                     }
                     catch (std::exception& e)
                     {
-                        std::cerr << "TCP Exception: " << e.what() << "\n";
+                        std::ostringstream oss;
+                        oss << "TCPSession Exception: " << e.what();
+                        log(oss.str());
                     }
                 }
                 else if(type=="serial"){

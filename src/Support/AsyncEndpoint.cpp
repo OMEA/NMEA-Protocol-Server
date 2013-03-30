@@ -41,7 +41,9 @@ template<class T> void AsyncEndpoint<T>::exit_cmd(Command_ptr command){
     }
     catch (std::exception& e)
     {
-        std::cerr << "TCPSession Exception: " << e.what() << "\n";
+        std::ostringstream oss;
+        oss << "TCPSession Exception: " << e.what();
+        log(oss.str());
     }
 }
 
@@ -110,7 +112,9 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
                         CommandEndpoint::deliver(command);
                     }
                     catch (const std::invalid_argument& ia) {
-                        std::cerr << "Received a command that might not be conform with command format: " << tmpString << std::endl;
+                        std::ostringstream oss;
+                        oss << "Received a command that might not be conform with command format: " << tmpString;
+                        log(oss.str());
                     }
                 }
                 else if(data.find('$')!=std::string::npos || data.find('!')!=std::string::npos){
@@ -120,7 +124,9 @@ template<class T> void AsyncEndpoint<T>::handle_read(const boost::system::error_
                             receive(msg);
                         }
                         catch (const std::invalid_argument& ia) {
-                            std::cerr << "Received a message that might not be conform with NMEA-0183 message format: " << tmpString << " (" << ia.what() << ")" << std::endl;
+                            std::ostringstream oss;
+                            oss << "Received a message that might not be conform with NMEA-0183 message format: " << tmpString << " (" << ia.what() << ")";
+                            log(oss.str());
                         }
                     }
                 }

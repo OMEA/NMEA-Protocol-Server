@@ -27,6 +27,7 @@ public:
     using NMEAEndpoint::receive;
 protected:
     FileEndpoint(boost::shared_ptr<Endpoint> connectedTo);
+    virtual void initialize();
 public:
     virtual ~FileEndpoint();
     void open(std::string filename);
@@ -40,7 +41,8 @@ public:
     void record(void);
 protected:
     virtual boost::shared_ptr<Endpoint> v_shared_from_this(){return this->shared_from_this();}
-    
+private:
+    void space_left_cmd(Command_ptr command);
 private:
     void play(boost::posix_time::ptime from,  boost::posix_time::ptime to);
     std::deque<NMEAmsg_ptr> message_queue;
@@ -51,6 +53,8 @@ private:
     bool recording;
     bool stopPlaybackNow;
     boost::thread playbackThread;
+    int min_available_mbs;
+    bool wasFull;
 };
 
 typedef boost::shared_ptr<FileEndpoint> FileEndpoint_ptr;

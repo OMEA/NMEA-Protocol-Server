@@ -9,12 +9,28 @@
 #include "FileEndpoint.h"
 #include "../NMEA/NMEAServer.h"
 #include <boost/regex.hpp>
+#include <boost/filesystem.hpp>
 
 boost::shared_ptr<FileEndpoint> FileEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo, std::string filename) {
     FileEndpoint_ptr fileEndpoint(new FileEndpoint(connectedTo));
     fileEndpoint->initialize();
     fileEndpoint->open(filename);
     return fileEndpoint;
+}
+
+void FileEndpoint::initialize(){
+    NMEAEndpoint::initialize();
+    registerIntCmd("min_available","Minimimum remaining disk space", "Defines the minimum remaining disk space that should be left. When there is not enough space on the disk hosting this file, nothing is written. -1 = nocheck", &min_available_mbs, -1, -1, std::numeric_limits<int>::max(), true);
+    boost::function<void (Command_ptr)> func = boost::bind(&FileEndpoint::space_left_cmd, this, _1);
+    registerVoidCmd("space_left","Print Space left", "Prints the space left on the disk",  func);
+}
+
+void FileEndpoint::space_left_cmd(Command_ptr command){
+    boost::filesystem::path filepath(filename);
+    boost::filesystem::space_info space = boost::filesystem::space(filepath);
+    std::ostringstream oss;
+    oss << (space.available/1024/1024) << "MB left on device\n";
+    command->answer(oss.str(), this->shared_from_this());
 }
 
 void FileEndpoint::receive(Command_ptr command){
@@ -46,6 +62,23 @@ void FileEndpoint::receive(Command_ptr command){
 
 void FileEndpoint::deliver_impl(NMEAmsg_ptr msg){
     if(recording){
+        bool disk_check=true;
+        if(disk_check){
+            boost::filesystem::path filepath(filename);
+            boost::filesystem::space_info space = boost::filesystem::space(filepath);
+            if(space.available != -1 && min_available_mbs != -1 && ((space.available/1024/1024)<=min_available_mbs)){
+                if(!wasFull){
+                    std::ostringstream oss;
+                    oss << "Space available not sufficient:" << space.available/1024/1024;
+                    log(oss.str());
+                }
+                wasFull=true;
+                return;
+            }
+            else{
+                 wasFull=false;
+            }
+        }
         out_file_stream << to_simple_string(msg->getReceived()) << " " << msg->data(true);
         out_file_stream.flush();
     }
