@@ -39,6 +39,10 @@ void NMEAEndpoint::initialize(){
     stat_list_size=60;
     in_total_size=0;
     out_total_size=0;
+    in_msg_from_start=0;
+    in_byte_from_start=0;
+    out_msg_from_start=0;
+    out_byte_from_start=0;
 }
 
 void NMEAEndpoint::add_midpoint_cmd(Command_ptr command){
@@ -60,17 +64,32 @@ void NMEAEndpoint::print_stats_cmd(Command_ptr command){
     oss << "Statistics for " << getId() << std::endl << "---------------------------------------" << std::endl;
     if(stats_enabled){
         boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-        boost::posix_time::ptime out_oldest = out_stat_list.front().first;
-        double out_msg_per_sec = ((double)out_stat_list.size()*1000)/(double)(now-out_oldest).total_microseconds();
-        double out_byte_per_sec = ((double)out_total_size*1000)/(double)(now-out_oldest).total_microseconds();
-        boost::posix_time::ptime in_oldest = in_stat_list.front().first;
-        double in_msg_per_sec = ((double)in_stat_list.size()*1000)/(double)(now-in_oldest).total_microseconds();
-        double in_byte_per_sec = ((double)in_total_size*1000)/(double)(now-in_oldest).total_microseconds();
-        
-        oss << "output messages per second:" << '\t' << out_msg_per_sec << std::endl;
-        oss << "output bytes per second:" << '\t' << out_byte_per_sec << std::endl;
-        oss << "input messages per second:" << '\t' << in_msg_per_sec << std::endl;
-        oss << "input bytes per second:" << '\t' << in_byte_per_sec << std::endl;
+        if(out_stat_list.size()>0){
+            boost::posix_time::ptime out_oldest = out_stat_list.front().first;
+            double out_time_passed = (((double)(now-out_oldest).total_microseconds())/1000000);
+            double out_msg_per_sec = out_stat_list.size()/out_time_passed;
+            double out_byte_per_sec = out_total_size/out_time_passed;
+            oss << "output messages per second:" << '\t' << out_msg_per_sec << std::endl;
+            oss << "output bytes per second:" << '\t' << out_byte_per_sec << std::endl;
+            oss << "output messages total:" << '\t' << out_msg_from_start << std::endl;
+            oss << "output MB total:" << '\t' << out_byte_from_start/1024/1024 << std::endl;
+        }
+        else{
+            oss << "No messages sent yet" << std::endl;
+        }
+        if(in_stat_list.size()>0){
+            boost::posix_time::ptime in_oldest = in_stat_list.front().first;
+            double in_time_passed = (((double)(now-in_oldest).total_microseconds())/1000000);
+            double in_msg_per_sec = in_stat_list.size()/in_time_passed;
+            double in_byte_per_sec = in_total_size/in_time_passed;
+            oss << "input messages per second:" << '\t' << in_msg_per_sec << std::endl;
+            oss << "input bytes per second:" << '\t' << in_byte_per_sec << std::endl;
+            oss << "input messages total:" << '\t' << in_msg_from_start << std::endl;
+            oss << "input MB total:" << '\t' << in_byte_from_start/1024/1024 << std::endl;
+        }
+        else{
+            oss << "No messages received yet" << std::endl;
+        }
     }
     command->answer(oss.str(), this->v_shared_from_this());
 }
@@ -159,6 +178,9 @@ void NMEAEndpoint::update_stats_deliver(NMEAmsg_ptr msg){
         out_stat_list.pop_front();
     }
     out_total_size+=msg->length();
+    out_byte_from_start+=msg->length();
+    out_msg_from_start++;
+    
     out_stat_list.push_back(std::pair<boost::posix_time::ptime, size_t>(msg->getReceived(), msg->length()));
 }
 
@@ -169,5 +191,7 @@ void NMEAEndpoint::update_stats_receive(NMEAmsg_ptr msg){
         in_stat_list.pop_front();
     }
     in_total_size+=msg->length();
+    in_byte_from_start+=msg->length();
+    in_msg_from_start++;
     in_stat_list.push_back(std::pair<boost::posix_time::ptime, size_t>(msg->getReceived(), msg->length()));
 }

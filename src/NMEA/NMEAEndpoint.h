@@ -65,8 +65,12 @@ private:
     bool stats_enabled;
     std::list<std::pair<boost::posix_time::ptime, size_t> > in_stat_list;
     unsigned int in_total_size;
+    unsigned long in_msg_from_start;
+    unsigned long in_byte_from_start;
     std::list<std::pair<boost::posix_time::ptime, size_t> > out_stat_list;
     unsigned int out_total_size;
+    unsigned long out_msg_from_start;
+    unsigned long out_byte_from_start;
     unsigned int stat_list_size;
 };
 
