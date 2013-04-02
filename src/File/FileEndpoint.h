@@ -55,6 +55,7 @@ private:
     boost::thread playbackThread;
     int min_available_mbs;
     bool wasFull;
+    bool record_answers;
 };
 
 typedef boost::shared_ptr<FileEndpoint> FileEndpoint_ptr;

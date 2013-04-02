@@ -23,6 +23,7 @@ void FileEndpoint::initialize(){
     registerIntCmd("min_available","Minimimum remaining disk space", "Defines the minimum remaining disk space that should be left. When there is not enough space on the disk hosting this file, nothing is written. 0 = nocheck", &min_available_mbs, 0, 0, std::numeric_limits<int>::max(), true);
     boost::function<void (Command_ptr)> func = boost::bind(&FileEndpoint::space_left_cmd, this, _1);
     registerVoidCmd("space_left","Print Space left", "Prints the space left on the disk",  func);
+    registerBoolCmd("record_answer","Record answers", "When on, answers are recorded to the file aswell.",  &record_answers, false, true);
 }
 
 void FileEndpoint::space_left_cmd(Command_ptr command){
@@ -146,7 +147,26 @@ void FileEndpoint::play(boost::posix_time::ptime from,  boost::posix_time::ptime
 }
 
 void FileEndpoint::deliverAnswer_impl(Answer_ptr answer){
-    //TODO: maybe write answers to file?
+    if(record_answers && recording){
+        if(min_available_mbs > 0){
+            boost::filesystem::path filepath(filename);
+            boost::filesystem::space_info space = boost::filesystem::space(filepath);
+            if(space.available != -1 && min_available_mbs != -1 && ((space.available/1024/1024)<=min_available_mbs)){
+                if(!wasFull){
+                    std::ostringstream oss;
+                    oss << "Space available not sufficient:" << space.available/1024/1024;
+                    log(oss.str());
+                }
+                wasFull=true;
+                return;
+            }
+            else{
+                wasFull=false;
+            }
+        }
+        out_file_stream << to_simple_string(answer->getReceived()) << " " << answer->to_str();
+        out_file_stream.flush();
+    }
 }
 
 FileEndpoint::FileEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAEndpoint(connectedTo){

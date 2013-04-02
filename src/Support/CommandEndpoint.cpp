@@ -133,9 +133,14 @@ void CommandEndpoint::registerVoidCmd(std::string name, std::string speakingName
 }
 
 void CommandEndpoint::log(std::string message){
-    for(std::vector<std::string>::iterator destination = log_destination.begin(); destination!=log_destination.end();++destination){
-        Answer_ptr answer = Answer_ptr(new Answer(Answer::LOG, message, v_shared_from_this(), Command_ptr()));
-        answer->setReceiver(*destination);
-        receive(answer);
+    if(log_destination.size()>0){
+        for(std::vector<std::string>::iterator destination = log_destination.begin(); destination!=log_destination.end();++destination){
+            Answer_ptr answer = Answer_ptr(new Answer(Answer::LOG, message, v_shared_from_this(), Command_ptr()));
+            answer->setReceiver(*destination);
+            receive(answer);
+        }
+    }
+    else {
+        std::cout << message << std::endl;
     }
 }
