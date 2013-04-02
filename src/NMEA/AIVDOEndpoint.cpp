@@ -10,6 +10,7 @@
 #include "Messages/AIVDmsg.h"
 #include "Messages/RMCmsg.h"
 #include "../AIS/PositionReportmsg.h"
+#include "../AIS/PositionReportClassBmsg.h"
 
 boost::shared_ptr<AIVDOEndpoint> AIVDOEndpoint::factory(boost::shared_ptr<Endpoint> connectedTo, unsigned int mmsi) {
     AIVDOEndpoint_ptr aivdoEndpoint(new AIVDOEndpoint(connectedTo));
@@ -36,39 +37,60 @@ std::string AIVDOEndpoint::getId(){
 }
 
 void AIVDOEndpoint::sendPositionReportClassA(){
-    PositionReportmsg_ptr pr = boost::shared_ptr<PositionReportmsg>(new PositionReportmsg(getMMSI()));
-    pr->setStatus(AISmsg::MOORED);
-    pr->setSog((unsigned int)(getSpeed()*10));
-    pr->setAccuracy(false);
+//    PositionReportmsg_ptr pr = boost::shared_ptr<PositionReportmsg>(new PositionReportmsg(getMMSI()));
+//    pr->setStatus(AISmsg::MOORED);
+//    pr->setSog((unsigned int)(getSpeed()*10));
+//    pr->setAccuracy(false);
+//    int lon = 0;
+//    lon += getLongitude().getDegrees()*600000;
+//    lon += getLongitude().getMinutes()*10000;
+//    if(getLongitude().getSign()==Longitude::WEST){
+//        lon*=-1;
+//    }
+//    pr->setLon(lon);
+//    int lat = 0;
+//    lat += getLatitude().getDegrees()*600000;
+//    lat += getLatitude().getMinutes()*10000;
+//    if(getLatitude().getSign()==Latitude::SOUTH){
+//        lat*=-1;
+//    }
+//    pr->setLat(lat);
+//    pr->setCourse(((unsigned int)getCourse()*10));
+//    pr->setHeading(511);
+//    pr->setTimestamp(getTime().time_of_day().seconds());
+//    pr->setManeuver(AISmsg::NOT_AVAILABLE);
+//    pr->setRaim(false);
+//    pr->setRadio(0);
+    PositionReportClassBmsg_ptr prcb = boost::shared_ptr<PositionReportClassBmsg>(new PositionReportClassBmsg(getMMSI()));
+    prcb->setSog((unsigned int)(getSpeed()*10));
+    prcb->setAccuracy(false);
     int lon = 0;
     lon += getLongitude().getDegrees()*600000;
     lon += getLongitude().getMinutes()*10000;
     if(getLongitude().getSign()==Longitude::WEST){
         lon*=-1;
     }
-    pr->setLon(lon);
+    prcb->setLon(lon);
     int lat = 0;
     lat += getLatitude().getDegrees()*600000;
     lat += getLatitude().getMinutes()*10000;
     if(getLatitude().getSign()==Latitude::SOUTH){
         lat*=-1;
     }
-    pr->setLat(lat);
-    pr->setCourse(((unsigned int)getCourse()*10));
-    pr->setHeading(511);
-    pr->setTimestamp(getTime().time_of_day().seconds());
-    pr->setManeuver(AISmsg::NOT_AVAILABLE);
-    pr->setRaim(false);
-    pr->setRadio(0);
+    prcb->setLat(lat);
+    prcb->setCourse(((unsigned int)getCourse()*10));
+    prcb->setHeading(511);
+    prcb->setSecond(getTime().time_of_day().seconds());
+    
     
     AIVDmsg_ptr msg(new AIVDmsg(this->v_shared_from_this(), true));
     msg->setFragmentCount(1);
     msg->setFragment(1);
     msg->setMessageId(0);
     msg->setChannelCode('B');
-    std::string payload = pr->toCodedStr();
+    std::string payload = prcb->toCodedStr();
     msg->setPayload(payload);
-    msg->setFillBits(pr->getBitLength()%6);
+    msg->setFillBits(prcb->getBitLength()%6);
     receive(msg);
 }
 

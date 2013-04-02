@@ -12,6 +12,7 @@
 #include "AISmsg.h"
 #include "PositionReportmsg.h"
 #include "StaticVoyageRelatedmsg.h"
+#include "PositionReportClassBmsg.h"
 
 const char AISmsg::sixBit2Char[64] = {'@','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','[','\\',']','^','_',' ','!','\"','#','$','%','&','\'','(',')','*','+',',','-','.','/','0','1','2','3','4','5','6','7','8','9',':',';','<','=','>','?'};
 const std::map<char,unsigned char> AISmsg::char2SixBit = boost::assign::map_list_of('@',0)('A',1)('B',2)('C',3)('D',4)('E',5)('F',6)('G',7)('H',8)('I',9)('J',10)('K',11)('L',12)('M',13)('N',14)('O',15)('P',16)('Q',17)('R',18)('S',19)('T',20)('U',21)('V',22)('W',23)('X',24)('Y',25)('Z',26)('[',27)('\\',28)(']',29)('^',30)('_',31)(' ',32)('!',33)('\"',34)('#',35)('#',36)('%',37)('&',38)('\'',39)('(',40)(')',41)('*',42)('+',43)(',',44)('-',45)('.',46)('/',47)('0',48)('1',49)('2',50)('3',51)('4',52)('5',53)('6',54)('7',55)('8',56)('9',57)(':',58)(';',59)('<',60)('=',61)('>',62)('?',63);
@@ -215,6 +216,9 @@ boost::shared_ptr<AISmsg> AISmsg::factory(std::string parseMsg) {
             break;
         case AISmsg::STATIC_VOYAGE_RELATED:
             ret = StaticVoyageRelatedmsg::factory(deArm);
+            break;
+        case AISmsg::STANDARD_CLASS_B_CS_POSITION_REPORT:
+            ret = PositionReportClassBmsg::factory(deArm);
             break;
         default:
             ret = boost::shared_ptr<AISmsg>(new AISmsg(deArm));

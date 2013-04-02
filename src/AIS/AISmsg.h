@@ -32,7 +32,8 @@ public:
         POSITION_REPORT_CLASS_A_2=2,
         POSITION_REPORT_CLASS_A_3=3,
         BASE_STATION_REPORT=4,
-        STATIC_VOYAGE_RELATED = 5
+        STATIC_VOYAGE_RELATED = 5,
+        STANDARD_CLASS_B_CS_POSITION_REPORT = 18
     };
     enum NavigationStatus {
         UNDER_WAY_USING_ENGINE=0,

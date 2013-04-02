@@ -20,7 +20,7 @@ boost::shared_ptr<FileEndpoint> FileEndpoint::factory(boost::shared_ptr<Endpoint
 
 void FileEndpoint::initialize(){
     NMEAEndpoint::initialize();
-    registerIntCmd("min_available","Minimimum remaining disk space", "Defines the minimum remaining disk space that should be left. When there is not enough space on the disk hosting this file, nothing is written. -1 = nocheck", &min_available_mbs, -1, -1, std::numeric_limits<int>::max(), true);
+    registerIntCmd("min_available","Minimimum remaining disk space", "Defines the minimum remaining disk space that should be left. When there is not enough space on the disk hosting this file, nothing is written. 0 = nocheck", &min_available_mbs, 0, 0, std::numeric_limits<int>::max(), true);
     boost::function<void (Command_ptr)> func = boost::bind(&FileEndpoint::space_left_cmd, this, _1);
     registerVoidCmd("space_left","Print Space left", "Prints the space left on the disk",  func);
 }
@@ -62,8 +62,7 @@ void FileEndpoint::receive(Command_ptr command){
 
 void FileEndpoint::deliver_impl(NMEAmsg_ptr msg){
     if(recording){
-        bool disk_check=true;
-        if(disk_check){
+        if(min_available_mbs > 0){
             boost::filesystem::path filepath(filename);
             boost::filesystem::space_info space = boost::filesystem::space(filepath);
             if(space.available != -1 && min_available_mbs != -1 && ((space.available/1024/1024)<=min_available_mbs)){
