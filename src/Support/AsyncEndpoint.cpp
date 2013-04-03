@@ -206,9 +206,9 @@ template<class T> void AsyncEndpoint<T>::start()
             message_queue = std::deque<Message_ptr>(activated->message_queue);
         }
         log("Session reactivated");
-        boost::system::error_code ec(0,boost::system::system_category());
-        handle_write(ec);
     }
+    boost::system::error_code ec(0,boost::system::system_category());
+    handle_write(ec);
     isActive=true;
     aostream->async_read_some(boost::asio::buffer(data_, max_length),
                               boost::bind(&AsyncEndpoint::handle_read, this,

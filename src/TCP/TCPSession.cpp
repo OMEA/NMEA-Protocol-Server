@@ -56,7 +56,7 @@ void TCPSession::enable_icmp_cmd(Command_ptr command){
             command->answer("ICMP Keepalive protection is disabled\n", this->shared_from_this());
         }
     }
-    if(command->getArguments()=="on"){
+    else if(command->getArguments()=="on"){
         if(!icmp_keepalive){
             icmp_keepalive=true;
             workerThread=boost::thread(&TCPSession::icmp_setup, this);
