@@ -233,6 +233,17 @@ template<class T> boost::shared_ptr<AsyncEndpoint<T> > AsyncEndpoint<T>::activat
     }
 }
 
+template<class T> std::string AsyncEndpoint<T>::getEndpointState(){
+    std::string retVal = NMEAEndpoint::getEndpointState();
+    if(!isActive){
+        if(retVal.length()>0){
+            retVal+=" ";
+        }
+        retVal+="persisted";
+    }
+    return retVal;
+}
+
 template <class T> std::map<std::string, boost::shared_ptr<AsyncEndpoint<T> > > AsyncEndpoint<T>::sessions;
 
 template class AsyncEndpoint<boost::asio::ip::tcp::socket>;

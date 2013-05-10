@@ -16,13 +16,6 @@
 #define MATCH_PAYLOAD MATCH_CHANNEL_CODE+1
 #define MATCH_FILL_BITS MATCH_PAYLOAD+1
 
-unsigned int fragmentCount;
-unsigned int fragment;
-unsigned int messageId;
-char channelCode;
-std::string payload;
-unsigned char fillBits;
-
 AIVDmsg::AIVDmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum): NMEAmsg(parseMsg, sender, check_checksum){
     setMsg(NMEAmsg::getMsg());
 }

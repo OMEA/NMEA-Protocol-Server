@@ -17,6 +17,7 @@
 #include "../NMEA/AISEndpoint.h"
 #include "../NMEA/AIVDOEndpoint.h"
 #include "../NMEA/MemoryStoreEndpoint.h"
+#include "../NMEA/CompassEndpoint.h"
 
 static NMEAServer_ptr theInstance = NMEAServer_ptr();
 
@@ -102,7 +103,11 @@ void NMEAServer::receiveCommand(Command_ptr command){
             std::ostringstream ss;
             ss << "Currently " << online.size() << " endpoints connected" << std::endl << "---------------------------------------" << std::endl;
             for (std::list<Endpoint_ptr>::const_iterator endpoint = online.begin(), end = online.end(); endpoint != end; ++endpoint) {
-                ss << (*endpoint)->getId() << std::endl;
+                std::string state = getEndpointState();
+                if(state.length()>0){
+                    state = "("+state+")";
+                }
+                ss << (*endpoint)->getId() << '\t' << state << std::endl;
             }
             command->answer(ss.str(), this->shared_from_this());
         }
@@ -187,6 +192,10 @@ void NMEAServer::receiveCommand(Command_ptr command){
                 else if(type=="MemoryStore"){
                     MemoryStoreEndpoint::factory(this->shared_from_this(), args);
                     command->answer("New MemoryStoreEndpoint successfully created\n", this->shared_from_this());
+                }
+                else if(type=="Compass"){
+                    CompassEndpoint::factory(this->shared_from_this());
+                    command->answer("New CompassEndpoint successfully created\n", this->shared_from_this());
                 }
                 else{
                     command->answer(Answer::WRONG_ARGS, "Cannot understand command Argument "+command->getArguments()+" for Command "+command->getCommand()+". No such endpoint type to create.\n", this->shared_from_this());

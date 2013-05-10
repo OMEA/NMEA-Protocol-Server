@@ -22,6 +22,7 @@ protected:
 public:
     virtual ~Endpoint(){}
     virtual std::string getId()=0;
+    virtual std::string getEndpointState(){return "";}
     
 protected:
     virtual void registerEndpoint();

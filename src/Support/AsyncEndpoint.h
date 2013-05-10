@@ -42,6 +42,7 @@ public:
     
     void setSessionId(std::string sessionId){this->sessionId = sessionId;}
     std::string getSessionId(){return sessionId;}
+    virtual std::string getEndpointState();
 protected:
     void setAOStream(T* aostream){this->aostream=aostream;}
     T* getAOStream(){return aostream;}
