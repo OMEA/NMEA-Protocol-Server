@@ -19,9 +19,9 @@ typedef boost::asio::posix::stream_descriptor pipe_end;
 void CompassEndpoint::run_child()
 {
     std::vector<std::string> args;
-    args.push_back("/usr/bin/nc");
-    args.push_back("-l");
-    args.push_back("12345");
+    args.push_back("/usr/bin/minimu9-ahrs");
+    args.push_back("--output");
+    args.push_back("euler");
     try {
         boost::process::pipe pipe = boost::process::create_pipe();
         boost::iostreams::file_descriptor_sink sink(pipe.sink, boost::iostreams::close_handle);
@@ -31,8 +31,8 @@ void CompassEndpoint::run_child()
         boost::process::child child = boost::process::execute(boost::process::initializers::set_args(args),
                                                           boost::process::initializers::start_in_dir("."),
                                                           boost::process::initializers::throw_on_error(),
-                                                          boost::process::initializers::bind_stdout(sink)//,
-                                                          //boost::process::initializers::close_stdin(),
+                                                          boost::process::initializers::bind_stdout(sink),
+                                                          boost::process::initializers::close_stdin()//,
                                                           //boost::process::initializers::close_stderr()
                                                           );
         
@@ -114,7 +114,6 @@ void CompassEndpoint::update(float yaw, float pitch, float roll){
 void CompassEndpoint::send_messages(){
     HDMmsg_ptr msg(new HDMmsg(this->v_shared_from_this()));
     msg->setHeadingMagnetic(yaw);
-    std::cout << msg->to_str() << std::endl;
     receive(msg);
     timer_.expires_from_now(boost::posix_time::seconds(1));
     timer_.async_wait(boost::bind(&CompassEndpoint::send_messages, this));
