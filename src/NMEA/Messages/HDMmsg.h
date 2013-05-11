@@ -21,7 +21,7 @@ public:
         
     void setHeadingMagnetic(float headingMagnetic){
         if(headingMagnetic>=0){this->headingMagnetic=headingMagnetic;}
-        else{this->headingMagnetic=360-headingMagnetic;}
+        else{this->headingMagnetic=360+headingMagnetic;}
     }
     float getHeadingMagnetic(){return headingMagnetic;}
     
