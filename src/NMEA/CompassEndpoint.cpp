@@ -47,7 +47,6 @@ void CompassEndpoint::run_child()
     {
         std::ostringstream oss;
         oss << "CompassEndpoint Exception: " << e.what();
-        std::cout << "CompassEndpoint Exception: " << e.what() << std::endl;
         log(oss.str());
     }
 }
@@ -68,11 +67,21 @@ CompassEndpoint::CompassEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAE
 
 void CompassEndpoint::initialize(){
     NMEAEndpoint::initialize();
-    //workerThread=boost::thread(&CompassEndpoint::run_child, this);
-    run_child();
+    workerThread=boost::thread(&CompassEndpoint::run_child, this);
+    //run_child();
+    boost::function<void (Command_ptr)> func = boost::bind(&CompassEndpoint::list_cmd, this, _1);
+    registerVoidCmd("list","List of Properties", "List of all properties of the digital compass.",  func);
     registerEndpoint();
 }
 
+
+void CompassEndpoint::list_cmd(Command_ptr command){
+    std::ostringstream oss;
+    oss << "Heading:" << "\t\t" << yaw << std::endl;
+    oss << "Pitch:" << "\t\t" << pitch << std::endl;
+    oss << "Roll:" << "\t\t" << roll << std::endl;
+    command->answer(oss.str(), v_shared_from_this());
+}
 
 void CompassEndpoint::deliver_impl(NMEAmsg_ptr msg){
     

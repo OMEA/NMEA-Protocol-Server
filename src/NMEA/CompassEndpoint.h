@@ -42,6 +42,7 @@ private:
     void run_child();
     void update(float yaw, float pitch, float roll);
     void send_messages();
+    void list_cmd(Command_ptr command);
     
 private:
     enum { max_length = 1024 };
