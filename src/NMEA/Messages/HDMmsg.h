@@ -19,7 +19,10 @@ public:
     HDMmsg(Endpoint_ptr sender);
     
         
-    void setHeadingMagnetic(float headingMagnetic){this->headingMagnetic=headingMagnetic;}
+    void setHeadingMagnetic(float headingMagnetic){
+        if(headingMagnetic>=0){this->headingMagnetic=headingMagnetic;}
+        else{this->headingMagnetic=360-headingMagnetic;}
+    }
     float getHeadingMagnetic(){return headingMagnetic;}
     
     virtual void setMsg(std::string msg);

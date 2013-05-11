@@ -47,7 +47,6 @@ void CompassEndpoint::run_child()
     {
         std::ostringstream oss;
         oss << "CompassEndpoint Exception: " << e.what();
-        std::cout << "CompassEndpoint Exception: " << e.what();
         log(oss.str());
     }
 }
@@ -78,9 +77,9 @@ void CompassEndpoint::initialize(){
 
 void CompassEndpoint::list_cmd(Command_ptr command){
     std::ostringstream oss;
-    oss << "Heading:" << "\t\t" << yaw << std::endl;
-    oss << "Pitch:" << "\t\t" << pitch << std::endl;
-    oss << "Roll:" << "\t\t" << roll << std::endl;
+    oss << "Heading:" << "\t\t" << yaw << "°" << std::endl;
+    oss << "Pitch:" << "\t\t" << pitch << "°" << std::endl;
+    oss << "Roll:" << "\t\t" << roll << "°" << std::endl;
     command->answer(oss.str(), v_shared_from_this());
 }
 
@@ -99,7 +98,7 @@ void CompassEndpoint::handle_read(const boost::system::error_code& error,
                 std::string tmpString = data.substr(0,pos);
                 tmpString.erase(std::remove(tmpString.begin(), tmpString.end(), '\n'), tmpString.end());
                 tmpString.erase(std::remove(tmpString.begin(), tmpString.end(), '\r'), tmpString.end());
-                
+                trim(tmpString);
                 std::vector< std::string > floats;
                 split( floats, tmpString, is_any_of(" *"), token_compress_on );
                 std::cout << floats.size() << std::endl;
