@@ -101,7 +101,8 @@ void CompassEndpoint::handle_read(const boost::system::error_code& error,
                 tmpString.erase(std::remove(tmpString.begin(), tmpString.end(), '\r'), tmpString.end());
                 
                 std::vector< std::string > floats;
-                split( floats, tmpString, is_any_of(" "), token_compress_on );
+                split( floats, tmpString, is_any_of(" *"), token_compress_on );
+                std::cout << floats.size() << std::endl;
                 if(floats.size()==9){
                     float yaw = boost::lexical_cast<float>(floats[0]);
                     float pitch = boost::lexical_cast<float>(floats[1]);
