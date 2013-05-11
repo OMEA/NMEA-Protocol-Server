@@ -32,6 +32,7 @@ void HDMmsg::setMsg(std::string msg){
 }
 const std::string HDMmsg::getMsg()const{
     std::ostringstream oss;
+    oss << headingMagnetic << ",M";
     return oss.str();
 }
 

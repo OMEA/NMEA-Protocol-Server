@@ -20,6 +20,8 @@ void CompassEndpoint::run_child()
 {
     std::vector<std::string> args;
     args.push_back("/usr/bin/minimu9-ahrs");
+    args.push_back("-b");
+    args.push_back("/dev/i2c-1");
     args.push_back("--output");
     args.push_back("euler");
     try {
