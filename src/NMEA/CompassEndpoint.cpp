@@ -47,6 +47,7 @@ void CompassEndpoint::run_child()
     {
         std::ostringstream oss;
         oss << "CompassEndpoint Exception: " << e.what();
+        std::cout << "CompassEndpoint Exception: " << e.what();
         log(oss.str());
     }
 }
