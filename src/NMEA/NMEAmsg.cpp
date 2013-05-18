@@ -27,7 +27,7 @@ boost::shared_ptr<NMEAmsg> NMEAmsg::factory(std::string parseMsg, Endpoint_ptr s
         newMsg = boost::shared_ptr<AIVDmsg>(new AIVDmsg(parseMsg, sender, check_checksum));
     }
     else if(id=="HCHDM" || id=="HDM"){
-        newMsg = boost::shared_ptr<ZDAmsg>(new ZDAmsg(parseMsg, sender, check_checksum));
+        newMsg = boost::shared_ptr<HDMmsg>(new HDMmsg(parseMsg, sender, check_checksum));
     }
     else if(id=="GPZDA" || id=="ZDA"){
         newMsg = boost::shared_ptr<ZDAmsg>(new ZDAmsg(parseMsg, sender, check_checksum));
