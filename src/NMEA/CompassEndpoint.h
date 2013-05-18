@@ -28,6 +28,7 @@ protected:
     CompassEndpoint(boost::shared_ptr<Endpoint> connectedTo);
     virtual void initialize();
 public:
+    ~CompassEndpoint();
     std::string getId(){return "DigitalCompass";}
 protected:
     virtual void deliver_impl(NMEAmsg_ptr msg);
@@ -43,6 +44,7 @@ private:
     void update(float yaw, float pitch, float roll);
     void send_messages();
     void list_cmd(Command_ptr command);
+    void exit_cmd(Command_ptr command);
     
 private:
     enum { max_length = 1024 };

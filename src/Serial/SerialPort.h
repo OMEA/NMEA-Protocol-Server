@@ -17,7 +17,7 @@ using namespace boost;
 
 class SerialPort : public AsyncEndpoint<asio::serial_port>{
 public:
-    static boost::shared_ptr<SerialPort> factory(boost::shared_ptr<Endpoint> connectedTo, std::string devName);
+    static boost::shared_ptr<SerialPort> factory(boost::shared_ptr<Endpoint> connectedTo, std::string devName, unsigned int boud);
 public:
     SerialPort();
     /**

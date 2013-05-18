@@ -37,11 +37,11 @@ void CompassEndpoint::run_child()
                                                           boost::process::initializers::close_stdin()//,
                                                           //boost::process::initializers::close_stderr()
                                                           );
-        
         pend->async_read_some(boost::asio::buffer(data_, max_length),boost::bind(&CompassEndpoint::handle_read, this,
                                                                             boost::asio::placeholders::error,
                                                                             boost::asio::placeholders::bytes_transferred));
         io_service.run();
+        terminate(child);
         wait_for_exit(child);
     }catch (std::exception& e)
     {
@@ -65,22 +65,32 @@ CompassEndpoint::CompassEndpoint(boost::shared_ptr<Endpoint> connectedTo): NMEAE
     timer_.async_wait(boost::bind(&CompassEndpoint::send_messages, this));
 }
 
+CompassEndpoint::~CompassEndpoint(){
+    io_service.stop();
+}
+
 void CompassEndpoint::initialize(){
     NMEAEndpoint::initialize();
     workerThread=boost::thread(&CompassEndpoint::run_child, this);
-    //run_child();
     boost::function<void (Command_ptr)> func = boost::bind(&CompassEndpoint::list_cmd, this, _1);
     registerVoidCmd("list","List of Properties", "List of all properties of the digital compass.",  func);
+    func = boost::bind(&CompassEndpoint::exit_cmd, this, _1);
+    registerVoidCmd("exit","Close DigitalCompass", "Removes the Compass from the active endpoints.",  func);
     registerEndpoint();
 }
 
 
 void CompassEndpoint::list_cmd(Command_ptr command){
     std::ostringstream oss;
-    oss << "Heading:" << "\t\t" << yaw << "°" << std::endl;
+    float heading = yaw>=0?yaw:360+yaw;
+    oss << "Heading:" << "\t\t" << heading << "°" << std::endl;
     oss << "Pitch:" << "\t\t" << pitch << "°" << std::endl;
     oss << "Roll:" << "\t\t" << roll << "°" << std::endl;
     command->answer(oss.str(), v_shared_from_this());
+}
+
+void CompassEndpoint::exit_cmd(Command_ptr command){
+    io_service.stop();
 }
 
 void CompassEndpoint::deliver_impl(NMEAmsg_ptr msg){
@@ -114,6 +124,9 @@ void CompassEndpoint::handle_read(const boost::system::error_code& error,
                                                                       boost::asio::placeholders::error,
                                                                       boost::asio::placeholders::bytes_transferred));
     }
+    else{
+        unregisterEndpoint();
+    }
 }
 
 void CompassEndpoint::update(float yaw, float pitch, float roll){
@@ -124,6 +137,7 @@ void CompassEndpoint::update(float yaw, float pitch, float roll){
 
 void CompassEndpoint::send_messages(){
     HDMmsg_ptr msg(new HDMmsg(this->v_shared_from_this()));
+    msg->setId("HCHDM");
     msg->setHeadingMagnetic(yaw);
     receive(msg);
     timer_.expires_from_now(boost::posix_time::seconds(1));

@@ -30,7 +30,7 @@ public:
     
     void setStart(char start){this->start = start;}
     const char getStart()const{return this->start;}
-    void setId(char id){this->id = id;}
+    void setId(std::string id){this->id = id;}
     const std::string getId()const{return this->id;}
     virtual void setMsg(std::string msg);
     virtual const std::string getMsg()const{return this->msg;}

@@ -9,6 +9,8 @@
 #include "NMEAmsg.h"
 #include "Messages/RMCmsg.h"
 #include "Messages/AIVDmsg.h"
+#include "Messages/HDMmsg.h"
+#include "Messages/ZDAmsg.h"
 
 #include <boost/regex.hpp>
 #include <string>
@@ -18,11 +20,17 @@
 boost::shared_ptr<NMEAmsg> NMEAmsg::factory(std::string parseMsg, Endpoint_ptr sender, bool check_checksum) {
     boost::shared_ptr<NMEAmsg> newMsg;
     std::string id=parseMsg.substr(1, parseMsg.find_first_of(',',2)-1);
-    if(id=="GPRMC"){
+    if(id=="GPRMC" || id=="RMC"){
         newMsg = boost::shared_ptr<RMCmsg>(new RMCmsg(parseMsg, sender, check_checksum));
     }
     else if(id=="AIVDO" || id=="AIVDM"){
         newMsg = boost::shared_ptr<AIVDmsg>(new AIVDmsg(parseMsg, sender, check_checksum));
+    }
+    else if(id=="HCHDM" || id=="HDM"){
+        newMsg = boost::shared_ptr<ZDAmsg>(new ZDAmsg(parseMsg, sender, check_checksum));
+    }
+    else if(id=="GPZDA" || id=="ZDA"){
+        newMsg = boost::shared_ptr<ZDAmsg>(new ZDAmsg(parseMsg, sender, check_checksum));
     }
     else{
         newMsg = boost::shared_ptr<NMEAmsg>(new NMEAmsg(parseMsg, sender, check_checksum));

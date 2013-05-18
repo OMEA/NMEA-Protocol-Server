@@ -159,8 +159,24 @@ void NMEAServer::receiveCommand(Command_ptr command){
                     }
                 }
                 else if(type=="serial"){
-                    SerialPort::factory(this->shared_from_this(), args);
-                    command->answer("New SerialPort successfully created\n", this->shared_from_this());
+                    std::vector<std::string> strs;
+                    try
+                    {
+                        boost::split(strs, args, boost::is_any_of("\t "));
+                        if(strs.size()==2){
+                            unsigned int boud = lexical_cast<unsigned int>(strs[1]);
+                            SerialPort::factory(this->shared_from_this(), strs[0] ,boud);
+                            command->answer("New SerialPort successfully created\n", this->shared_from_this());
+                        }
+                        else{
+                            command->answer(Answer::WRONG_ARGS,"Cannot create serial. Arguemnt must be \"device boudrate\"\n", this->shared_from_this());
+                        }
+                    }
+                    catch (std::exception& e)
+                    {
+                        std::cerr << "serial: " << e.what() << "\n";
+                        command->answer(Answer::WRONG_ARGS,"Cannot create serial. Arguemnt must be \"device boudrate\"\n", this->shared_from_this());
+                    }
                 }
                 else if(type=="GPSreceiver"){
                     GPSEndpoint::factory(this->shared_from_this());

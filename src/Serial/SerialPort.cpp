@@ -9,10 +9,10 @@
 #include "SerialPort.h"
 #include "../NMEA/NMEAServer.h"
 
-boost::shared_ptr<SerialPort> SerialPort::factory(boost::shared_ptr<Endpoint> connectedTo, std::string devName){
+boost::shared_ptr<SerialPort> SerialPort::factory(boost::shared_ptr<Endpoint> connectedTo, std::string devName, unsigned int boud){
     //IOService in endpoint und beim beenden stop() aufrufen
     
-    SerialPort_ptr sp = boost::shared_ptr<SerialPort>(new SerialPort(connectedTo, devName,9600));
+    SerialPort_ptr sp = boost::shared_ptr<SerialPort>(new SerialPort(connectedTo, devName, boud));
     sp->initialize();
     return sp;
 }
