@@ -171,6 +171,10 @@ void TCPSession::icmp_setup(){
         icmpsocket_.connect(destination_);
         icmp_test();
         icmp_receive();
+        try{
+            icmp_io_service.run();
+        }
+        catch (std::exception& e){}
     }
     catch (std::exception& e)
     {
@@ -178,10 +182,6 @@ void TCPSession::icmp_setup(){
         oss << "TCP Exception: " << e.what();
         log(oss.str());
     }
-    try{
-        icmp_io_service.run();
-    }
-    catch (std::exception& e){}
 }
 
 void TCPSession::icmp_test(){
