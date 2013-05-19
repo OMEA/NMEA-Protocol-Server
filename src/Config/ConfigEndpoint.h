@@ -14,6 +14,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "../Support/CommandEndpoint.h"
 #include "../Support/Command.h"
@@ -38,6 +39,7 @@ protected:
     
 private:
     std::string configname;
+    boost::mutex commandsMutex;
     std::list<Command_ptr> commands;
 };
 

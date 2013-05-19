@@ -33,15 +33,18 @@ void ConfigEndpoint::receive(Command_ptr command){
         command->answer("closed config "+configname+"\n", this_ptr);
     }
     else if(command->getCommand()=="has_commands"){
-        for (std::list<Command_ptr>::const_iterator tmp_command = commands.begin(), end = commands.end(); tmp_command != end; ++tmp_command) {
-            std::string receiver = (*tmp_command)->getReceiver();
-            boost::replace_all(receiver, "*", "(.*)");
-            boost::regex reg("^"+receiver+"$");
-            boost::cmatch matches;
-            CommandEndpoint_ptr sender = boost::dynamic_pointer_cast<CommandEndpoint>(command->getSender());
-            if(sender){
-                if(boost::regex_search(sender->getId().c_str(), matches, reg)){
-                    sender->receive((*tmp_command));
+        {
+            boost::mutex::scoped_lock lock(commandsMutex);
+            for (std::list<Command_ptr>::const_iterator tmp_command = commands.begin(), end = commands.end(); tmp_command != end; ++tmp_command) {
+                std::string receiver = (*tmp_command)->getReceiver();
+                boost::replace_all(receiver, "*", "(.*)");
+                boost::regex reg("^"+receiver+"$");
+                boost::cmatch matches;
+                CommandEndpoint_ptr sender = boost::dynamic_pointer_cast<CommandEndpoint>(command->getSender());
+                if(sender){
+                    if(boost::regex_search(sender->getId().c_str(), matches, reg)){
+                        sender->receive((*tmp_command));
+                    }
                 }
             }
         }
@@ -49,7 +52,10 @@ void ConfigEndpoint::receive(Command_ptr command){
     else if(command->getCommand()=="add_command"){
         try {
             Command_ptr newCommand(new Command(command->getArguments(), this->shared_from_this()));
-            commands.push_back(newCommand);
+            {
+                boost::mutex::scoped_lock lock(commandsMutex);
+                commands.push_back(newCommand);
+            }
             deliver(newCommand);
         }
         catch (const std::invalid_argument& ia) {
@@ -70,9 +76,13 @@ void ConfigEndpoint::receive(Command_ptr command){
     }
     else if(command->getCommand()=="list"){
         std::ostringstream ss;
-        ss << "Currently " << commands.size() << " commands in config" << std::endl << "---------------------------------------" << std::endl;
-        for (std::list<Command_ptr>::const_iterator commandi = commands.begin(), end = commands.end(); commandi != end; ++commandi) {
-            ss << (*commandi)->to_str() << '\n';
+        {
+            boost::mutex::scoped_lock lock(commandsMutex);
+            ss << "Currently " << commands.size() << " commands in config" << std::endl << "---------------------------------------" << std::endl;
+            for (std::list<Command_ptr>::const_iterator commandi = commands.begin(), end = commands.end(); commandi != end; ++commandi) {
+                ss << (*commandi)->to_str() << '\n';
+            }
+
         }
         command->answer(ss.str(), this->shared_from_this());
     }
@@ -111,7 +121,10 @@ void ConfigEndpoint::load(std::string configname){
         if(line.find('#')!=std::string::npos){
             try {
                 Command_ptr command(new Command(line, this->shared_from_this()));
-                commands.push_back(command);
+                {
+                    boost::mutex::scoped_lock lock(commandsMutex);
+                    commands.push_back(command);
+                }
             }
             catch (const std::invalid_argument& ia) {
                 std::ostringstream oss;
@@ -122,16 +135,23 @@ void ConfigEndpoint::load(std::string configname){
     }
     file_stream.close();
     registerEndpoint();
-    for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command) {
-        deliver(*command);
+    {
+        boost::mutex::scoped_lock lock(commandsMutex);
+        for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command)
+        {
+            deliver(*command);
+        }
     }
  }
 
 void ConfigEndpoint::save(std::string configname){
     std::ofstream file_stream;
     file_stream.open(configname.c_str());
-    for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command) {
-        file_stream << (*command)->to_str() << '\n';
+    {
+        boost::mutex::scoped_lock lock(commandsMutex);
+        for (std::list<Command_ptr>::const_iterator command = commands.begin(), end = commands.end(); command != end; ++command) {
+            file_stream << (*command)->to_str() << '\n';
+        }
     }
     file_stream.close();
 }
