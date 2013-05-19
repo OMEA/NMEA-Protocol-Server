@@ -91,9 +91,11 @@ void TimeEndpoint::deliver_impl(NMEAmsg_ptr msg){
                     int i=system(oss.str().c_str());
                     if(i){
                         std::ostringstream oss2;
-                        std::cerr << "TIME UPDATED" << std::endl;
                         oss2 << "Could not correct system clock, date command returned " << i << " when executing \"" << oss.str() << "\"";
                         log(oss2.str());
+                    }
+                    else{
+                        log("Updated local system clock");
                     }
                 }
 
