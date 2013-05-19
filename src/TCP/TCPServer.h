@@ -35,6 +35,7 @@ protected:
 private:
     std::list<TCPSession_ptr> sessions;
     boost::asio::io_service& io_service_;
+    boost::thread worker_thread;
     boost::asio::ip::tcp::acceptor acceptor_;
     short port;
 };

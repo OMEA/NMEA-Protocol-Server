@@ -31,10 +31,14 @@ error(false){
     open(devname,baud_rate,opt_parity,opt_csize,opt_flow,opt_stop);
 }
 
+void SerialPort::run(){
+    io.run();
+}
+
 void SerialPort::initialize(){
     AsyncEndpoint<asio::serial_port>::initialize();
     start();
-    io.run();
+    worker_thread = boost::thread(&SerialPort::run, this);
 }
 
 SerialPort::~SerialPort()

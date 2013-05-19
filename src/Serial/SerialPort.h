@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 #include "../Support/AsyncEndpoint.h"
 
 using namespace boost;
@@ -86,6 +87,7 @@ private:
      */
     static const int readBufferSize=82;
     
+    boost::thread worker_thread;
     asio::io_service io; ///< Io service object
     asio::serial_port port; ///< Serial port object
     bool openFlag; ///< True if port open
@@ -98,6 +100,8 @@ private:
      * Callback to close serial port
      */
     void doClose();
+
+    void run();
     
     /**
      * Report errors
