@@ -17,17 +17,19 @@ class RMCmsg: public NMEAmsg {
 public:
     RMCmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum=false);
     void setTime(boost::posix_time::ptime time){this->time=time;}
-    boost::posix_time::ptime getTime(){return time;}
+    const boost::posix_time::ptime getTime()const{return time;}
     void setState(State state){this->state=state;}
-    State getState(){return state;}
+    const State getState()const {return state;}
     void setLatitude(Latitude latitude){this->latitude=latitude;}
-    Latitude getLatitude(){return latitude;}
+    const Latitude getLatitude()const {return latitude;}
     void setLongitude(Longitude longitude){this->longitude=longitude;}
-    Longitude getLongitude(){return longitude;}
+    const Longitude getLongitude()const {return longitude;}
     void setSpeed(double speed){this->speed=speed;}
-    double getSpeed(){return speed;}
+    const double getSpeed()const {return speed;}
     void setCourse(double course){this->course=fmod(course,360);}
-    double getCourse(){return course;}
+    const double getCourse()const {return course;}
+    
+    virtual void setMsg(std::string msg);
 private:
     boost::posix_time::ptime time;
     State state;

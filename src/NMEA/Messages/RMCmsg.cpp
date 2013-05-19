@@ -27,9 +27,13 @@
 #define MATCH_YEAR MATCH_MONTH+1
 
 RMCmsg::RMCmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum): NMEAmsg(parseMsg, sender, check_checksum){
+    setMsg(NMEAmsg::getMsg());
+}
+
+void RMCmsg::setMsg(std::string msg){
     boost::regex reg("^(\\d{2})(\\d{2})(\\d{2})(\\.\\d{1,3})?,([AV]),(\\d{2})(\\d{2}\\.\\d{4}),([NS]),(\\d{2,3})(\\d{2}\\.\\d{4}),([EW]),(\\d{1,2}\\.\\d{1,3}),(\\d{1,3}\\.\\d{1,3}),(\\d{2})(\\d{2})(\\d{2}),(\\d{1,3}\\.\\d{1,3})?,([EW])?,([ADENS])$");
     boost::cmatch matches;
-    if(boost::regex_search(this->getMsg().c_str(), matches, reg)){
+    if(boost::regex_search(msg.c_str(), matches, reg)){
         std::string ts("20"+matches[MATCH_YEAR]+"-"+matches[MATCH_MONTH]+"-"+matches[MATCH_DAY]+" "+matches[MATCH_HOUR]+":"+matches[MATCH_MINUTE]+":"+matches[MATCH_SECOND]+matches[MATCH_SUBSECOND]);
         try{
             time = boost::posix_time::time_from_string(ts);

@@ -77,7 +77,7 @@ NMEAmsg::NMEAmsg(std::string parseMsg, Endpoint_ptr sender, bool check_checksum)
 
 std::size_t NMEAmsg::hash_value(){
     boost::hash<std::string> hasher;
-    return hasher(id+msg);
+    return hasher(getId()+getMsg());
 }
 
 const char * NMEAmsg::data(bool checksum) const{
