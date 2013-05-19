@@ -18,6 +18,7 @@
 #include "../NMEA/AIVDOEndpoint.h"
 #include "../NMEA/MemoryStoreEndpoint.h"
 #include "../NMEA/CompassEndpoint.h"
+#include "../NMEA/TimeEndpoint.h"
 
 static NMEAServer_ptr theInstance = NMEAServer_ptr();
 
@@ -181,6 +182,10 @@ void NMEAServer::receiveCommand(Command_ptr command){
                 else if(type=="GPSreceiver"){
                     GPSEndpoint::factory(this->shared_from_this());
                     command->answer("New GPSEndpoint successfully created\n", this->shared_from_this());
+                }
+                else if(type=="TimeEndpoint"){
+                    TimeEndpoint::factory(this->shared_from_this());
+                    command->answer("New TimeEndpoint successfully created\n", this->shared_from_this());
                 }
                 else if(type=="AISreceiver"){
                     AISEndpoint::factory(this->shared_from_this());

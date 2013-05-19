@@ -20,7 +20,10 @@ public:
     ZDAmsg(Endpoint_ptr sender);
     
     void setTimeDate(boost::posix_time::ptime time_date){this->time_date=time_date;}
-    boost::posix_time::ptime getTimeDate(){return time_date;}
+    const boost::posix_time::ptime getTimeDate()const {return time_date;}
+    
+    void setTimezone(boost::local_time::posix_time_zone zone){this->zone=zone;}
+    const boost::local_time::posix_time_zone getTimezone()const{return zone;}
     
     virtual void setMsg(std::string msg);
     virtual const std::string getMsg()const;

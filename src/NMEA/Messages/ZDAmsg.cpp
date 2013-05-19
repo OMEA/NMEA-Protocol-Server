@@ -8,6 +8,8 @@
 
 #include "ZDAmsg.h"
 #include <boost/regex.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
 
 #define MATCH_HOUR 1
 #define MATCH_MINUTE MATCH_HOUR+1
@@ -46,9 +48,14 @@ void ZDAmsg::setMsg(std::string msg){
 }
 const std::string ZDAmsg::getMsg()const{
     std::ostringstream oss;
-    //boost::posix_time::time_duration utc_offset = zone.base_utc_offset();
-    //time_facet *facet = new time_facet("%d-%b-%Y %H:%M:%S");
-    oss << "hhmmss.ss,dd,mm,yyyy,xx,yy";
+    boost::posix_time::time_duration utc_offset = zone.base_utc_offset();
+    boost::posix_time::time_facet *timefacet = new boost::posix_time::time_facet("%H%M%S%F,%d,%m,%Y");
+    boost::posix_time::time_facet *offsetfacet = new boost::posix_time::time_facet("");
+    offsetfacet->time_duration_format("%+%H,%M");
+    oss.imbue(std::locale(oss.getloc(), timefacet));
+    oss << getTimeDate() << ",";
+    oss.imbue(std::locale(oss.getloc(), offsetfacet));
+    oss << utc_offset;
     return oss.str();
 }
 
