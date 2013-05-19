@@ -39,6 +39,8 @@ public:
     void setTimezone(boost::local_time::posix_time_zone zone){this->zone=zone;}
     boost::local_time::posix_time_zone getTimezone(){return zone;}
 private:
+    bool gen_zda;
+    bool correction;
     bool receivedData;
     boost::posix_time::ptime time;
     boost::local_time::posix_time_zone zone;

@@ -37,6 +37,8 @@ void TimeEndpoint::initialize(){
     registerVoidCmd("set_zone","Set Timezone", "Set the timezone the device currently operates in. Default is \"UTC+0\"",  func);
     func = boost::bind(&TimeEndpoint::get_zone_cmd, this, _1);
     registerVoidCmd("get_zone","Get Timezone", "Prints the configured timezone the device currently operates in.",  func);
+    registerBoolCmd("zda", "Generate ZDA messages on incoming RMC", "When on, ZDA messages are generated using the configured timezone (see set_zone)", &gen_zda, true);
+    registerBoolCmd("correction", "Correct system clock based on RMC messages", "When on, the system clock is adjusted by incoming RMC messages, when it differs more than 1 minute", &correction, false);
     receivedData=false;
     registerEndpoint();
 }
@@ -67,12 +69,36 @@ void TimeEndpoint::get_zone_cmd(Command_ptr command){
 void TimeEndpoint::deliver_impl(NMEAmsg_ptr msg){
     if(RMCmsg_ptr rmc = boost::dynamic_pointer_cast<RMCmsg>(msg)){
         time = rmc->getTime();
-        
-        ZDAmsg_ptr msg(new ZDAmsg(this->v_shared_from_this()));
-        msg->setTimeDate(time);
-        msg->setTimezone(getTimezone());
-        receive(msg);
-        
+        if(gen_zda){
+            ZDAmsg_ptr msg(new ZDAmsg(this->v_shared_from_this()));
+            msg->setTimeDate(time);
+            msg->setTimezone(getTimezone());
+            receive(msg);
+        }
+        if(correction){
+            boost::posix_time::time_duration deviation = boost::posix_time::second_clock::universal_time()-rmc->getTime();
+            if(deviation<boost::posix_time::time_duration(0,0,0)){
+                deviation = deviation.invert_sign();
+            }
+            if(deviation>=boost::posix_time::time_duration(0,1,0)){
+                std::ostringstream oss;
+                boost::posix_time::time_facet *timefacet = new boost::posix_time::time_facet("%Y-%m-%d %H:%M:%S");
+                oss.imbue(std::locale(oss.getloc(), timefacet));
+                oss << "date +\"%Y-%m-%d %H:%M:%S\" -s \"";
+                oss << rmc->getTime();
+                oss << "\"";
+                if(system(NULL)){
+                    int i=system(oss.str().c_str());
+                    if(i){
+                        std::ostringstream oss2;
+                        std::cerr << "TIME UPDATED" << std::endl;
+                        oss2 << "Could not correct system clock, date command returned " << i << " when executing \"" << oss.str() << "\"";
+                        log(oss2.str());
+                    }
+                }
+
+            }
+        }
         receivedData=true;
     }
 }
