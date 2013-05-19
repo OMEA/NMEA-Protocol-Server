@@ -169,13 +169,13 @@ void NMEAServer::receiveCommand(Command_ptr command){
                             command->answer("New SerialPort successfully created\n", this->shared_from_this());
                         }
                         else{
-                            command->answer(Answer::WRONG_ARGS,"Cannot create serial. Arguemnt must be \"device boudrate\"\n", this->shared_from_this());
+                            command->answer(Answer::WRONG_ARGS,"Cannot create serial. Argument must be \"device boudrate\"\n", this->shared_from_this());
                         }
                     }
                     catch (std::exception& e)
                     {
                         std::cerr << "serial: " << e.what() << "\n";
-                        command->answer(Answer::WRONG_ARGS,"Cannot create serial. Arguemnt must be \"device boudrate\"\n", this->shared_from_this());
+                        command->answer(Answer::WRONG_ARGS,"Cannot create serial. Argument must be \"device boudrate\"\n", this->shared_from_this());
                     }
                 }
                 else if(type=="GPSreceiver"){

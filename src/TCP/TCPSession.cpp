@@ -134,7 +134,7 @@ std::string TCPSession::getId(){
     }
     catch (std::exception& e){
         try{
-            ss<<socket().remote_endpoint().address().to_string()<< "inactive_socket@tcp"<<port;
+            ss<<socket().remote_endpoint().address().to_string()<< "@tcp"<<port;
         }catch (std::exception& e){
             ss<< "inactive_socket@tcp"<<port;
         }

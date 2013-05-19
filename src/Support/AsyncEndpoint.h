@@ -65,6 +65,7 @@ private:
     std::string sessionId;
     bool wasFull;
 private:
+    static boost::mutex sessionsMutex;
     static std::map<std::string, boost::shared_ptr<AsyncEndpoint<T> > > sessions;
 public:
     static void deactivateSession(boost::shared_ptr<AsyncEndpoint<T> > session);

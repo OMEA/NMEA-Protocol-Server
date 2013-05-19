@@ -11,7 +11,9 @@
 
 boost::shared_ptr<SerialPort> SerialPort::factory(boost::shared_ptr<Endpoint> connectedTo, std::string devName, unsigned int boud){
     //IOService in endpoint und beim beenden stop() aufrufen
-    
+    if(boud != 2400 || boud != 4800 || boud != 9600 || boud != 19200 || boud != 38400 || boud != 2400 || boud != 57600 || boud != 115200){
+        throw std::invalid_argument("Invalid Boudrate!");
+    }
     SerialPort_ptr sp = boost::shared_ptr<SerialPort>(new SerialPort(connectedTo, devName, boud));
     sp->initialize();
     return sp;

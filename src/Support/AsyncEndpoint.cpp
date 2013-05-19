@@ -218,17 +218,24 @@ template<class T> void AsyncEndpoint<T>::start()
 
 template<class T> void AsyncEndpoint<T>::deactivateSession(boost::shared_ptr<AsyncEndpoint<T> > session){
     session->isActive=false;
-    sessions.insert(std::pair<std::string,boost::shared_ptr<AsyncEndpoint<T> > >(session->sessionId,session));
+    {
+        boost::mutex::scoped_lock lock(sessionsMutex);
+        sessions.insert(std::pair<std::string,boost::shared_ptr<AsyncEndpoint<T> > >(session->sessionId,session));
+    }
+    
 }
 
-template<class T> boost::shared_ptr<AsyncEndpoint<T> > AsyncEndpoint<T>::activateSession(boost::shared_ptr<AsyncEndpoint<T> > session){    
+template<class T> boost::shared_ptr<AsyncEndpoint<T> > AsyncEndpoint<T>::activateSession(boost::shared_ptr<AsyncEndpoint<T> > session){
+    sessionsMutex.lock();
     if(sessions.find(session->sessionId)!=sessions.end()){
         std::pair<std::string,boost::shared_ptr<AsyncEndpoint<T> > > pair = *(sessions.find(session->sessionId));
         sessions.erase(session->sessionId);
+        sessionsMutex.unlock();
         session->isActive=true;
         return pair.second;
     }
     else{
+        sessionsMutex.unlock();
         return boost::shared_ptr<AsyncEndpoint<T> >();
     }
 }
@@ -245,6 +252,7 @@ template<class T> std::string AsyncEndpoint<T>::getEndpointState(){
 }
 
 template <class T> std::map<std::string, boost::shared_ptr<AsyncEndpoint<T> > > AsyncEndpoint<T>::sessions;
+template <class T> boost::mutex AsyncEndpoint<T>::sessionsMutex;
 
 template class AsyncEndpoint<boost::asio::ip::tcp::socket>;
 template class AsyncEndpoint<boost::asio::serial_port>;
