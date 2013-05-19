@@ -53,7 +53,7 @@ private:
     bool recording;
     bool stopPlaybackNow;
     boost::thread playbackThread;
-    int min_available_mbs;
+    long long int min_available_mbs;
     bool wasFull;
     bool record_answers;
 };

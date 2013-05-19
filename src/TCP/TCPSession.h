@@ -55,7 +55,7 @@ private:
     boost::asio::streambuf reply_buffer_;
     std::size_t num_replies_;
     unsigned int icmp_timeouts;
-    unsigned int icmp_maxtimeouts;
+    unsigned long long int icmp_maxtimeouts;
     bool icmp_first_try;
     bool icmp_keepalive;
     int stat_roundtrip_ms;

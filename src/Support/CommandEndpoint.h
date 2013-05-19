@@ -39,8 +39,8 @@ protected:
 protected:
     void unregisterCmd(std::string name);
     void registerBoolCmd(std::string name, std::string speakingName, std::string description, bool *boolean, bool defaultValue, bool writeable=true);
-    void registerUIntCmd(std::string name, std::string speakingName, std::string description, unsigned int *uint, unsigned int defaultValue, unsigned int min=0, unsigned int max=UINT_MAX, bool writeable=true);
-    void registerIntCmd(std::string name, std::string speakingName, std::string description, int *int_, int defaultValue, int min, int max, bool writeable);
+    void registerUIntCmd(std::string name, std::string speakingName, std::string description, unsigned long long int *uint, unsigned long long int defaultValue, unsigned long long int min=0, unsigned long long int max=std::numeric_limits<unsigned long long int>::max(), bool writeable=true);
+    void registerIntCmd(std::string name, std::string speakingName, std::string description, long long int *int_, long long int defaultValue, long long int min, long long int max, bool writeable=true);
     void registerStringCmd(std::string name, std::string speakingName, std::string description, std::string *string, std::string defaultValue, bool writeable);
     void registerStringVectorCmd(std::string name, std::string speakingName, std::string description, std::vector<std::string> *vector, bool writeable);
     void registerVoidCmd(std::string name, std::string speakingName, std::string description, boost::function<void (Command_ptr)> &func);

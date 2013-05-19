@@ -38,7 +38,7 @@ private:
     
 private:
     std::deque<Message_ptr> message_queue;
-    unsigned int store_size;
+    unsigned long long int store_size;
     std::string name;
 };
 

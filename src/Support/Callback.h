@@ -51,24 +51,24 @@ private:
 
 class UIntCallback: public MemberCallback{
 public:
-    UIntCallback(std::string name, std::string speakingName, std::string description, unsigned int *uint, unsigned int min, unsigned int max, bool writeable): MemberCallback(name, speakingName, description, writeable), min(min), max(max), uint(uint){}
+    UIntCallback(std::string name, std::string speakingName, std::string description, unsigned long long int *uint, unsigned long long int min, unsigned long long int max, bool writeable): MemberCallback(name, speakingName, description, writeable), min(min), max(max), uint(uint){}
     virtual void execute(Command_ptr command, CommandEndpoint_ptr instance);
     virtual const std::string to_str() const;
 private:
-    unsigned int min;
-    unsigned int max;
-    unsigned int *uint;
+    unsigned long long int min;
+    unsigned long long int max;
+    unsigned long long int *uint;
 };
 
 class IntCallback: public MemberCallback{
 public:
-    IntCallback(std::string name, std::string speakingName, std::string description, int *int_, int min, int max, bool writeable): MemberCallback(name, speakingName, description, writeable), min(min), max(max), int_(int_){}
+    IntCallback(std::string name, std::string speakingName, std::string description, long long int *int_, long long int min, long long int max, bool writeable): MemberCallback(name, speakingName, description, writeable), min(min), max(max), int_(int_){}
     virtual void execute(Command_ptr command, CommandEndpoint_ptr instance);
     virtual const std::string to_str() const;
 private:
-    int min;
-    int max;
-    int *int_;
+    long long int min;
+    long long int max;
+    long long int *int_;
 };
 
 class StringCallback: public MemberCallback{

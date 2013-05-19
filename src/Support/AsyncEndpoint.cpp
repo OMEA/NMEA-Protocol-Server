@@ -21,7 +21,7 @@ template<class T> void AsyncEndpoint<T>::initialize(){
     NMEAEndpoint::initialize();
     
     registerBoolCmd("persist" ,"Session persistance", "When on, messages are stored after a disconnect and after the reconnect replayed. See also [queue_size]", &persist, false, true);
-    registerUIntCmd("queue_size","Message Queue Size", "Defines the maximum size of the message queue for this endpoint. See also [persist]", &message_queue_size, 10, 0, 65535, true);
+    registerUIntCmd("queue_size","Message Queue Size", "Defines the maximum size of the message queue for this endpoint. See also [persist]", &message_queue_size, 10, 0, std::numeric_limits<unsigned int>::max(), true);
     boost::function<void (Command_ptr)> func = boost::bind(&AsyncEndpoint<T>::exit_cmd, this, _1);
     registerVoidCmd("exit","End Session", "Ends the session and disconnects the remote host. Command does not take any arguments.",  func);
     unregisterCmd("print_stats");

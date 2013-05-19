@@ -46,8 +46,8 @@ protected:
     bool portmirror;
     bool checksum;
     bool check_checksum;
-    int incompress_messages;
-    int outcompress_messages;
+    long long int incompress_messages;
+    long long int outcompress_messages;
 protected:
     void add_midpoint_cmd(Command_ptr command);
     void print_stats_cmd(Command_ptr command);

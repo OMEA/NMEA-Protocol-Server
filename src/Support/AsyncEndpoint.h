@@ -55,7 +55,7 @@ private:
     std::deque<Message_ptr> message_queue;
     boost::condition_variable message_queueCond;
     boost::mutex message_queueMutex;
-    unsigned int message_queue_size;
+    unsigned long long int message_queue_size;
     enum { max_length = 8192 };
     char data_[max_length];
     char data_send_[max_length];

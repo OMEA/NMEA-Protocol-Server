@@ -104,13 +104,13 @@ void CommandEndpoint::registerBoolCmd(std::string name, std::string speakingName
     registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
 }
 
-void CommandEndpoint::registerUIntCmd(std::string name, std::string speakingName, std::string description, unsigned int *uint, unsigned int defaultValue, unsigned int min, unsigned int max, bool writeable){
+void CommandEndpoint::registerUIntCmd(std::string name, std::string speakingName, std::string description, unsigned long long int *uint, unsigned long long int defaultValue, unsigned long long int min, unsigned long long int max, bool writeable){
     *uint=defaultValue;
     Callback_ptr callback(new UIntCallback(name, speakingName, description, uint, min, max, writeable));
     registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
 }
 
-void CommandEndpoint::registerIntCmd(std::string name, std::string speakingName, std::string description, int *int_, int defaultValue, int min, int max, bool writeable){
+void CommandEndpoint::registerIntCmd(std::string name, std::string speakingName, std::string description, long long int *int_, long long int defaultValue, long long int min, long long int max, bool writeable){
     *int_=defaultValue;
     Callback_ptr callback(new IntCallback(name, speakingName, description, int_, min, max, writeable));
     registred_commands.insert(std::pair<std::string,Callback_ptr>(name,callback));
